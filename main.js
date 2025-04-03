@@ -164,15 +164,25 @@ function submitStagingWord() {
 
 /* --- DISPLAY SUBMITTED WORDS & SCORE --- */
 function updateSubmittedWordsDisplay() {
-  document.getElementById('total-score').innerText = window.totalScore;
-  const listEl = document.getElementById('submitted-words-list');
-  listEl.innerHTML = '';
-  window.validWords.forEach(({ word, score }) => {
-    const li = document.createElement('li');
-    li.textContent = `${word} (${score})`;
-    listEl.appendChild(li);
-  });
-}
+    const tbody = document.getElementById('submitted-words-tbody');
+    tbody.innerHTML = '';
+    window.validWords.forEach(item => {
+      const tr = document.createElement('tr');
+      const tdWord = document.createElement('td');
+      tdWord.textContent = item.word;
+      const tdPoints = document.createElement('td');
+      tdPoints.textContent = item.score;
+      tr.appendChild(tdWord);
+      tr.appendChild(tdPoints);
+      tbody.appendChild(tr);
+    });
+    // Auto-scroll to the bottom of the submitted words container:
+    const container = document.getElementById('submitted-words-container');
+    container.scrollTop = container.scrollHeight;
+  
+    // Update the total score display
+    document.querySelector('.score-display .total-score').textContent = window.totalScore;
+  }
 
 /* --- TRADE FLOW --- */
 function enableTradeMode() {

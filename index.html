@@ -9,57 +9,70 @@
   </head>
   <body>
     <div class="container">
-      <!-- Header / Title -->
+      <!-- Header -->
       <header>
         <h1>Letter Trader</h1>
       </header>
 
-      <!-- Scoreboard & Submitted Words -->
-      <section class="scoreboard">
-        <div class="score-display">
-          <span id="total-score" class="total-score">0</span>
-          <label>Points</label>
+      <!-- Main Layout: Two Columns -->
+      <div class="main-layout">
+        <!-- Left Column: Submitted Words -->
+        <div class="submitted-column">
+          <h2>Submitted Words</h2>
+          <div id="submitted-words-container" class="submitted-words-container">
+            <table id="submitted-words-table">
+              <thead>
+                <tr>
+                  <th>Word</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody id="submitted-words-tbody">
+                <!-- Rows populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="score-display">
+            <span id="total-score" class="total-score">0</span>
+            <label>Points</label>
+          </div>
         </div>
-        <div class="submitted-words">
-          <h2>Words Submitted</h2>
-          <ul id="submitted-words-list"></ul>
-        </div>
-      </section>
 
-      <!-- Letters & Staging Area -->
-      <section class="letters-section">
-        <div id="letters-container" class="letters-container">
-          <!-- Dynamically populated by JS -->
+        <!-- Right Column: Letter Building Area -->
+        <div class="letter-column">
+          <!-- Upper part: Staging area and controls -->
+          <div class="letter-controls">
+            <div id="staging-word" class="staging-word">
+              <!-- Staged word appears here -->
+            </div>
+            <div class="controls">
+              <button id="submit-word" class="btn btn-submit">Submit</button>
+              <button id="clear-word" class="btn btn-clear">Clear</button>
+              <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
+              <div id="word-feedback" class="feedback"></div>
+            </div>
+          </div>
+          <!-- Lower part: Letter tiles (aligned to the lower right) -->
+          <div id="letters-container" class="letters-container">
+            <!-- Letter tiles rendered here -->
+          </div>
         </div>
-        <div id="staging-word" class="staging-word">
-          <!-- Current word being built -->
-        </div>
-      </section>
-
-      <!-- Controls & Feedback -->
-      <section class="controls">
-        <button id="submit-word" class="btn btn-submit">Submit</button>
-        <button id="clear-word" class="btn btn-clear">Clear</button>
-        <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
-
-        <div id="word-feedback" class="feedback"></div>
-      </section>
+      </div>
     </div>
 
-    <!-- Trade Overlay (hidden by default) -->
+    <!-- Trade Overlay (remains the same) -->
     <div id="trade-overlay" class="trade-overlay hidden">
       <div class="trade-popup">
-        <p class="trade-instructions">Select a letter <em>in your set</em> to trade away, then choose a new letter below.</p>
-        
-        <!-- Where we show available letters to trade to -->
-        <div id="trade-options" class="trade-options"></div>
-
-        <!-- Confirmation step: "Trade: B (3) -> T (1) [Go!]" -->
+        <p class="trade-instructions">
+          Select a letter in your set to trade away, then choose a new letter below.
+        </p>
+        <div id="trade-options" class="trade-options">
+          <!-- Trade options populated by JS -->
+        </div>
         <div id="trade-confirmation" class="trade-confirmation hidden">
           <p id="trade-summary"></p>
           <button id="confirm-trade" class="btn btn-submit">Go!</button>
         </div>
-
         <button id="close-trade-overlay" class="btn btn-close-trade">Close</button>
       </div>
     </div>

@@ -5,43 +5,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Initialize the Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Global variables for allowed letters, staging word, valid words, and total score
-window.allowedLetters = [];
+// Global variables for allowed letters, staging word, valid words, total score, and trade tracking
+window.allowedLetters = [];           // current letter set
+window.usedLetters = [];              // all letters that have ever been in the set (initial + traded in)
 window.stagingWord = '';
-window.validWords = [];
+window.validWords = [];               // array of objects: { word, score }
 window.totalScore = 0;
+window.validWordsSinceTrade = 0;      // counter since last trade
+window.tradeMode = false;             // flag for trade mode
+window.tradeLog = [];                 // array of trade objects: { from, to, timestamp }
+window.letterToTrade = null;          // the letter user has selected to trade
 
 // Define the point values for each letter (range 1-10)
 const letterScores = {
-  A: 1,
-  B: 3,
-  C: 3,
-  D: 2,
-  E: 1,
-  F: 4,
-  G: 2,
-  H: 4,
-  I: 1,
-  J: 8,
-  K: 5,
-  L: 1,
-  M: 3,
-  N: 1,
-  O: 1,
-  P: 3,
-  Q: 10,
-  R: 1,
-  S: 1,
-  T: 1,
-  U: 1,
-  V: 4,
-  W: 4,
-  X: 10,
-  Y: 4,
-  Z: 10
+  A: 1, B: 3, C: 3, D: 2, E: 1,
+  F: 4, G: 2, H: 4, I: 1, J: 8,
+  K: 5, L: 1, M: 3, N: 1, O: 1,
+  P: 3, Q: 10, R: 1, S: 1, T: 1,
+  U: 1, V: 4, W: 4, X: 10, Y: 4, Z: 10
 };
 
-// Function to compute the score for a word
+// Function to compute score for a word
 function computeScore(word) {
   let sum = 0;
   for (const char of word) {
@@ -50,7 +34,7 @@ function computeScore(word) {
   return sum * word.length;
 }
 
-// Utility to get today's date in YYYY-MM-DD format
+// Utility: Get today's date in YYYY-MM-DD format
 function getTodayDateString() {
   const today = new Date();
   const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -63,7 +47,6 @@ async function loadDictionary() {
   try {
     const response = await fetch('dictionary.json');
     const data = await response.json();
-    // Assuming words in dictionary.json are already in uppercase
     window.dictionary = data;
     console.log('Dictionary loaded:', window.dictionary.length, "words");
   } catch (err) {
@@ -87,53 +70,58 @@ async function fetchDailyLetters() {
   }
 
   if (data && data.letters) {
-    // Split, trim, and convert letters to uppercase
+    // Process letters: split, trim, uppercase
     const letterArray = data.letters.split(',').map(letter => letter.trim().toUpperCase());
     window.allowedLetters = letterArray;
+    // Initially, mark all starting letters as used
+    window.usedLetters = [...letterArray];
     renderLetterButtons(letterArray);
   } else {
     document.getElementById('letters-container').innerText = 'No letters found for today.';
   }
 }
 
-// Render each allowed letter as a clickable button
+// Render clickable letter buttons.
+// If tradeMode is active, clicking a letter initiates a trade.
 function renderLetterButtons(letterArray) {
   const container = document.getElementById('letters-container');
-  container.innerHTML = ''; // Clear any existing content
+  container.innerHTML = ''; // Clear existing content
   letterArray.forEach(letter => {
     const btn = document.createElement('button');
     btn.classList.add('letter-button');
     btn.innerText = letter;
-    // When clicked, add the letter to the staging word
     btn.addEventListener('click', () => {
-      appendLetterToStaging(letter);
+      if (window.tradeMode) {
+        // In trade mode, clicking a letter initiates a trade for that letter
+        initiateTrade(letter);
+      } else {
+        // Normal mode: append letter to staging word
+        appendLetterToStaging(letter);
+      }
     });
     container.appendChild(btn);
   });
 }
 
-// Update the staging word display area
+// Update staging word display
 function updateStagingDisplay() {
   const stagingDisplay = document.getElementById('staging-word');
   stagingDisplay.innerText = window.stagingWord || '';
 }
 
-// Append a letter to the staging word (allowing duplicates)
+// Append a letter to the staging word
 function appendLetterToStaging(letter) {
-  if (!window.stagingWord) {
-    window.stagingWord = '';
-  }
-  window.stagingWord += letter;
+  window.stagingWord = (window.stagingWord || '') + letter;
   updateStagingDisplay();
 }
 
-// Clear the staging word area
+// Clear the staging word
 function clearStagingWord() {
   window.stagingWord = '';
   updateStagingDisplay();
 }
 
-// Update the submitted words display area with word and score, and show total score
+// Update the display of submitted words and total score
 function updateSubmittedWordsDisplay() {
   const listContainer = document.getElementById('submitted-words-list');
   listContainer.innerHTML = ''; // Clear current list
@@ -142,62 +130,126 @@ function updateSubmittedWordsDisplay() {
     li.innerText = `${item.word} (Score: ${item.score})`;
     listContainer.appendChild(li);
   });
-  // Update total score display
   document.getElementById('total-score').innerText = `Total Score: ${window.totalScore}`;
 }
 
-// Handle submission of the staged word with dictionary validation and scoring
+// Handle submission of the staged word: validate, score, update counters.
 function submitStagingWord() {
   if (!window.stagingWord || window.stagingWord.length === 0) {
     document.getElementById('word-feedback').innerText = 'No word to submit!';
     return;
   }
   
-  // Capture the staged word and convert it to uppercase
   const word = window.stagingWord.toUpperCase();
-  
-  // Immediately clear the staging area
   clearStagingWord();
   
-  // Ensure the dictionary is loaded
   if (!window.dictionary) {
     document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
     return;
   }
   
-  // Validate the word against the dictionary
   if (!window.dictionary.includes(word)) {
     document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
     return;
   }
   
-  // Check for duplicate submission
   if (window.validWords.some(item => item.word === word)) {
     document.getElementById('word-feedback').innerText = `Word "${word}" has already been submitted!`;
     return;
   }
   
-  // Compute the score for the word
   const score = computeScore(word);
-  
-  // Add the word and its score to the list of valid words
   window.validWords.push({ word, score });
-  
-  // Update the running total score
   window.totalScore += score;
+  window.validWordsSinceTrade++;  // Increment counter for trade unlocking
   
-  // Log the submission and update the feedback
   console.log('Submitted word:', word, 'Score:', score);
   document.getElementById('word-feedback').innerText = `Valid submission: ${word} (Score: ${score})`;
-  
-  // Refresh the display of submitted words and total score
   updateSubmittedWordsDisplay();
+  
+  // Check if 10 words have been submitted since last trade; if so, show the trade button.
+  if (window.validWordsSinceTrade >= 10) {
+    document.getElementById('trade-letter').style.display = 'inline-block';
+  }
 }
 
-// Set up event listeners for control buttons
+// ========================
+// TRADING FUNCTIONS
+// ========================
+
+// Called when in trade mode and the user clicks a letter in their allowed set.
+// This records the letter to be traded away and displays available trade options.
+function initiateTrade(letter) {
+  window.letterToTrade = letter;
+  document.getElementById('trade-feedback').innerText = `Trading letter: ${letter}. Select a new letter:`;
+  displayTradeOptions();
+}
+
+// Displays available letters (A-Z minus those in window.usedLetters) as clickable buttons.
+function displayTradeOptions() {
+  const tradeOptionsContainer = document.getElementById('trade-options');
+  tradeOptionsContainer.innerHTML = '';  // Clear previous options
+  
+  // Get available letters: all letters A-Z that are NOT in usedLetters.
+  const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+  const availableLetters = allLetters.filter(l => !window.usedLetters.includes(l));
+  
+  availableLetters.forEach(letter => {
+    const btn = document.createElement('button');
+    btn.classList.add('trade-option-button');
+    btn.innerText = letter;
+    btn.addEventListener('click', () => {
+      executeTrade(letter);
+    });
+    tradeOptionsContainer.appendChild(btn);
+  });
+}
+
+// Executes the trade: replaces window.letterToTrade in allowedLetters with the new letter,
+// updates usedLetters and logs the trade, then resets trade mode.
+function executeTrade(newLetter) {
+  // Replace the traded letter in allowedLetters
+  const index = window.allowedLetters.indexOf(window.letterToTrade);
+  if (index !== -1) {
+    window.allowedLetters[index] = newLetter;
+  }
+  
+  // Add the new letter to usedLetters
+  window.usedLetters.push(newLetter);
+  
+  // Log the trade
+  window.tradeLog.push({
+    from: window.letterToTrade,
+    to: newLetter,
+    timestamp: new Date().toISOString()
+  });
+  
+  // Exit trade mode and reset trade-related counters
+  window.tradeMode = false;
+  window.validWordsSinceTrade = 0;
+  window.letterToTrade = null;
+  
+  // Hide trade options and trade button, and update UI
+  document.getElementById('trade-options').innerHTML = '';
+  document.getElementById('trade-feedback').innerText = `Trade complete: swapped letter.`;
+  document.getElementById('trade-letter').style.display = 'none';
+  
+  // Re-render the allowed letters UI
+  renderLetterButtons(window.allowedLetters);
+}
+
+// Event listener for the "Trade Letter" button. Activates trade mode.
+document.getElementById('trade-letter').addEventListener('click', () => {
+  window.tradeMode = true;
+  document.getElementById('trade-feedback').innerText = 'Trade mode activated: Click a letter in your set to trade away.';
+});
+
+// ========================
+// Set up event listeners for normal controls
 document.getElementById('clear-word').addEventListener('click', clearStagingWord);
 document.getElementById('submit-word').addEventListener('click', submitStagingWord);
 
-// When the page loads, fetch daily letters and load the dictionary
+// ========================
+// Initialization: fetch letters and load dictionary
 fetchDailyLetters();
 loadDictionary();

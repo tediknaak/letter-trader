@@ -8,28 +8,35 @@
   </head>
   <body>
     <h1>Letter Trader</h1>
+    
+    <!-- Allowed letters area -->
     <div id="letters-container">Loading daily letters...</div>
     
-    <!-- Staging area to show the word being built -->
+    <!-- Staging area for building a word -->
     <div id="staging-word" class="staging-word"></div>
     
-    <!-- Control buttons: Clear and Submit -->
+    <!-- Control buttons for word submission -->
     <div id="word-controls">
       <button id="clear-word">Clear</button>
       <button id="submit-word">Submit Word</button>
     </div>
     
-    <!-- Feedback area for submission messages -->
+    <!-- Feedback for word submissions -->
     <div id="word-feedback"></div>
     
     <!-- Total score display -->
     <div id="total-score" class="total-score">Total Score: 0</div>
     
-    <!-- Container for submitted valid words -->
+    <!-- Container for submitted words -->
     <div id="submitted-words" class="submitted-words">
       <h2>Submitted Words</h2>
       <ul id="submitted-words-list"></ul>
     </div>
+    
+    <!-- Trade controls -->
+    <button id="trade-letter" style="display: none;">Trade Letter</button>
+    <div id="trade-feedback"></div>
+    <div id="trade-options"></div>
     
     <script src="main.js"></script>
   </body>

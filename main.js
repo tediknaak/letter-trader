@@ -5,10 +5,50 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Initialize the Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Global variables for allowed letters, staging word, and valid words
+// Global variables for allowed letters, staging word, valid words, and total score
 window.allowedLetters = [];
 window.stagingWord = '';
 window.validWords = [];
+window.totalScore = 0;
+
+// Define the point values for each letter (range 1-10)
+const letterScores = {
+  A: 1,
+  B: 3,
+  C: 3,
+  D: 2,
+  E: 1,
+  F: 4,
+  G: 2,
+  H: 4,
+  I: 1,
+  J: 8,
+  K: 5,
+  L: 1,
+  M: 3,
+  N: 1,
+  O: 1,
+  P: 3,
+  Q: 10,
+  R: 1,
+  S: 1,
+  T: 1,
+  U: 1,
+  V: 4,
+  W: 4,
+  X: 10,
+  Y: 4,
+  Z: 10
+};
+
+// Function to compute the score for a word
+function computeScore(word) {
+  let sum = 0;
+  for (const char of word) {
+    sum += letterScores[char] || 0;
+  }
+  return sum * word.length;
+}
 
 // Utility to get today's date in YYYY-MM-DD format
 function getTodayDateString() {
@@ -25,7 +65,7 @@ async function loadDictionary() {
     const data = await response.json();
     // Assuming words in dictionary.json are already in uppercase
     window.dictionary = data;
-    console.log('Dictionary loaded:', window.dictionary);
+    console.log('Dictionary loaded:', window.dictionary.length, "words");
   } catch (err) {
     console.error('Error loading dictionary:', err);
   }
@@ -93,58 +133,66 @@ function clearStagingWord() {
   updateStagingDisplay();
 }
 
-// Update the submitted words display area
+// Update the submitted words display area with word and score, and show total score
 function updateSubmittedWordsDisplay() {
   const listContainer = document.getElementById('submitted-words-list');
   listContainer.innerHTML = ''; // Clear current list
-  window.validWords.forEach(word => {
+  window.validWords.forEach(item => {
     const li = document.createElement('li');
-    li.innerText = word;
+    li.innerText = `${item.word} (Score: ${item.score})`;
     listContainer.appendChild(li);
   });
+  // Update total score display
+  document.getElementById('total-score').innerText = `Total Score: ${window.totalScore}`;
 }
 
-// Handle submission of the staged word with dictionary validation
+// Handle submission of the staged word with dictionary validation and scoring
 function submitStagingWord() {
-    if (!window.stagingWord || window.stagingWord.length === 0) {
-      document.getElementById('word-feedback').innerText = 'No word to submit!';
-      return;
-    }
-    
-    // Capture the staged word and convert it to uppercase
-    const word = window.stagingWord.toUpperCase();
-    
-    // Immediately clear the staging word area
-    clearStagingWord();
-    
-    // Ensure the dictionary is loaded
-    if (!window.dictionary) {
-      document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
-      return;
-    }
-    
-    // Validate the word against the dictionary
-    if (!window.dictionary.includes(word)) {
-      document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
-      return;
-    }
-    
-    // Check for duplicate submission
-    if (window.validWords.includes(word)) {
-      document.getElementById('word-feedback').innerText = `Word "${word}" has already been submitted!`;
-      return;
-    }
-    
-    // If the word is valid and not a duplicate, add it to the list of valid words
-    window.validWords.push(word);
-    
-    // Log the submission and update the feedback
-    console.log('Submitted word:', word);
-    document.getElementById('word-feedback').innerText = `Valid submission: ${word}`;
-    
-    // Refresh the display of submitted words
-    updateSubmittedWordsDisplay();
+  if (!window.stagingWord || window.stagingWord.length === 0) {
+    document.getElementById('word-feedback').innerText = 'No word to submit!';
+    return;
   }
+  
+  // Capture the staged word and convert it to uppercase
+  const word = window.stagingWord.toUpperCase();
+  
+  // Immediately clear the staging area
+  clearStagingWord();
+  
+  // Ensure the dictionary is loaded
+  if (!window.dictionary) {
+    document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
+    return;
+  }
+  
+  // Validate the word against the dictionary
+  if (!window.dictionary.includes(word)) {
+    document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
+    return;
+  }
+  
+  // Check for duplicate submission
+  if (window.validWords.some(item => item.word === word)) {
+    document.getElementById('word-feedback').innerText = `Word "${word}" has already been submitted!`;
+    return;
+  }
+  
+  // Compute the score for the word
+  const score = computeScore(word);
+  
+  // Add the word and its score to the list of valid words
+  window.validWords.push({ word, score });
+  
+  // Update the running total score
+  window.totalScore += score;
+  
+  // Log the submission and update the feedback
+  console.log('Submitted word:', word, 'Score:', score);
+  document.getElementById('word-feedback').innerText = `Valid submission: ${word} (Score: ${score})`;
+  
+  // Refresh the display of submitted words and total score
+  updateSubmittedWordsDisplay();
+}
 
 // Set up event listeners for control buttons
 document.getElementById('clear-word').addEventListener('click', clearStagingWord);

@@ -22,7 +22,7 @@ async function fetchDailyLetters() {
     .from('daily_letters')
     .select('letters')
     .eq('puzzle_date', todayStr)
-   // .single();  // Expect a single row per day
+    .single();  // Expect a single row per day
   
   if (error) {
     console.error('Error fetching daily letters:', error);

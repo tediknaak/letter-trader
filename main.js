@@ -20,7 +20,7 @@ async function fetchDailyLetters() {
   const { data, error } = await supabase
     .from('daily_letters')
     .select('letters')
-    .eq('date', todayStr)
+    .eq('puzzle_date', todayStr)
     .single();  // Expect a single row per day
   
   if (error) {

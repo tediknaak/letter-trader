@@ -1,18 +1,21 @@
-/* --- Global Resets & Body Styles --- */
-* {
+/* Define a custom property for the accent blue used throughout */
+:root {
+    --accent-blue: #2196f3; /* Adjust as you like */
+  }
+  
+  /* --- Global Resets & Body Styles --- */
+  * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
   body {
     font-family: Arial, sans-serif;
-    background: #fff; /* White background */
+    background: #fff;
     color: #333;
-    margin: 0;
-    padding: 0;
   }
   
-  /* Container: narrow for mobile, can expand if needed */
+  /* Container: a bit wider to accommodate side-by-side layout */
   .container {
     max-width: 420px;
     margin: 0 auto;
@@ -34,15 +37,28 @@
   .main-layout {
     display: flex;
     gap: 1rem;
+    height: 80vh; /* So we can bottom-align the right column nicely */
   }
-  
-  /* LEFT COL: scoreboard + table */
   .left-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    /* No background or border so it's white on white */
   }
+  .right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* bottom-aligns content */
+  }
+  /* An inner wrapper so we can position items more flexibly if needed */
+  .right-col-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  
+  /* Score info */
   .score-info {
     font-size: 0.9rem;
     line-height: 1.2;
@@ -50,36 +66,42 @@
   }
   .score-info p {
     margin: 0.25rem 0;
-    font-weight: 500;
   }
+  
+  /* Submitted Words Table */
   .submitted-words-container {
-    flex: 1;
+    /* Set a fixed height or max-height */
+    max-height: 300px; /* adjust this value as needed for your design */
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 2px solid var(--accent-blue);
     border-radius: 4px;
   }
   .submitted-words-container table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* so we can hide cell dividers */
+    border-spacing: 0;
   }
-  .submitted-words-container th,
-  .submitted-words-container td {
-    border: 1px solid #eee;
-    padding: 0.4rem;
+  .submitted-words-container th {
+    background-color: var(--accent-blue);
+    color: #fff;
     font-size: 0.9rem;
     text-align: left;
+    padding: 0.4rem;
   }
-  .submitted-words-container thead {
-    background: #f2f2f2;
+  .submitted-words-container td {
+    font-size: 0.9rem;
+    padding: 0.4rem;
+    border: none; /* no visible cell dividers */
+  }
+  .submitted-words-container tr:not(:last-child) td {
+    border-bottom: 1px solid #e3f2fd; /* subtle row separator if you like */
+  }
+  .submitted-words-container th:nth-child(2),
+  .submitted-words-container td:nth-child(2) {
+    text-align: right; /* right-align points column */
   }
   
-  /* RIGHT COL: staging, letters, controls */
-  .right-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    /* no visible border or background */
-  }
+  /* Right column: staging word & letter tiles */
   .staging-word {
     min-height: 40px;
     font-size: 1.3rem;
@@ -95,7 +117,7 @@
     margin-bottom: 1rem;
   }
   
-  /* Letter tiles (main & trade) */
+  /* Letter tiles (main & trade) - now outlined in accent blue */
   .letter-button,
   .trade-option-button {
     position: relative;
@@ -104,7 +126,7 @@
     font-size: 1rem;
     font-weight: bold;
     background-color: #fff;
-    border: 2px solid #333;
+    border: 2px solid var(--accent-blue);
     border-radius: 6px;
     cursor: pointer;
     display: flex;
@@ -128,6 +150,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   .btn {
     padding: 0.65rem 1.2rem;
@@ -137,22 +160,26 @@
     cursor: pointer;
     font-weight: 500;
   }
+  /* Submit in accent blue */
   .btn-submit {
-    background-color: #5cb85c; /* closer to a green from your mockup */
+    background-color: var(--accent-blue);
     color: #fff;
   }
-  .btn-clear {
-    background-color: #6c757d; /* grey */
-    color: #fff;
-  }
+  /* Trade button states */
   .btn-trade {
-    background-color: #f0ad4e; /* orange */
-    color: #fff;
+    border: 2px solid var(--accent-blue);
   }
-  .btn-close-trade {
-    background-color: #dc3545; /* red */
-    color: #fff;
+  .btn-trade.disabled {
+    background-color: #fff; /* White inside when ineligible */
+    color: var(--accent-blue);
+    cursor: not-allowed;
   }
+  .btn-trade.enabled {
+    background-color: var(--accent-blue); /* Fill in blue when eligible */
+    color: #fff;
+    cursor: pointer;
+  }
+  /* Feedback text */
   .feedback {
     font-size: 0.9rem;
     min-height: 20px;
@@ -197,4 +224,8 @@
     margin-bottom: 1rem;
     font-size: 0.9rem;
     color: #333;
+  }
+  .btn-close-trade {
+    background-color: #dc3545;
+    color: #fff;
   }

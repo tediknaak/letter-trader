@@ -81,22 +81,43 @@ async function fetchDailyLetters() {
 
 /* --- RENDER LETTER BUTTONS --- */
 function renderLetterButtons(letterArray) {
-  const container = document.getElementById('letters-container');
-  container.innerHTML = '';
-
-  letterArray.forEach(letter => {
-    const btn = createLetterTile(letter, () => {
-      // If in trade mode, pick this letter as letterToTrade
-      if (window.tradeMode) {
-        pickLetterToTrade(letter);
-      } else {
-        // Otherwise, append to staging word
-        appendLetterToStaging(letter);
+    const container = document.getElementById('letters-container');
+    container.innerHTML = '';
+  
+    // Render each actual letter
+    letterArray.forEach(letter => {
+      const btn = createLetterTile(letter, () => {
+        if (window.tradeMode) {
+          pickLetterToTrade(letter);
+        } else {
+          appendLetterToStaging(letter);
+        }
+      });
+      container.appendChild(btn);
+    });
+  
+    // Now add a backspace tile
+    const backspaceTile = document.createElement('button');
+    backspaceTile.classList.add('letter-button');
+    // Using the Unicode symbol for backspace (⌫) or you can use a custom icon
+    backspaceTile.innerHTML = `
+      <span class="letter-main">&#9003;</span>
+    `;
+    backspaceTile.addEventListener('click', () => {
+      // Remove last character from stagingWord
+      if (!window.tradeMode) {
+        handleBackspace();
       }
     });
-    container.appendChild(btn);
-  });
-}
+    container.appendChild(backspaceTile);
+  }
+  
+  function handleBackspace() {
+    if (window.stagingWord.length > 0) {
+      window.stagingWord = window.stagingWord.slice(0, -1);
+      updateStagingDisplay();
+    }
+  }
 
 /* --- CREATE A LETTER TILE WITH POINTS --- */
 function createLetterTile(letter, onClick) {
@@ -153,6 +174,22 @@ function submitStagingWord() {
   window.totalScore += score;
   window.validWordsSinceTrade++;
 
+  // After each valid word submission
+    function checkTradeEligibility() {
+    const tradeBtn = document.getElementById('trade-letter');
+    if (window.validWordsSinceTrade >= 10) {
+      // Enable
+      tradeBtn.classList.remove('disabled');
+      tradeBtn.classList.add('enabled');
+      tradeBtn.disabled = false;
+    } else {
+      // Disable
+      tradeBtn.classList.remove('enabled');
+      tradeBtn.classList.add('disabled');
+      tradeBtn.disabled = true;
+    }
+  }
+
   document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
   updateSubmittedWordsDisplay();
 
@@ -178,17 +215,17 @@ function updateSubmittedWordsDisplay() {
       tbody.appendChild(tr);
     });
   
-    // Auto-scroll to the bottom so latest submission is visible
+    // Auto-scroll
     const container = document.getElementById('submitted-words-container');
     container.scrollTop = container.scrollHeight;
   
     // Update the total score display
     document.getElementById('total-score').textContent = window.totalScore;
   
-    // Update the words-submitted count
+    // Update words-submitted count
     document.getElementById('words-submitted-count').textContent = window.validWords.length;
   }
-
+  
 /* --- TRADE FLOW --- */
 function enableTradeMode() {
   window.tradeMode = true;

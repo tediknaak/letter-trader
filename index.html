@@ -19,8 +19,8 @@
         <!-- LEFT COLUMN: scoreboard + submitted words -->
         <div class="left-col">
           <div class="score-info">
-            <p class="words-submitted">Words Submitted: <span id="words-submitted-count">0</span></p>
-            <p class="score">Score: <span id="total-score">0</span></p>
+            <p><strong>Words Submitted:</strong> <span id="words-submitted-count">0</span></p>
+            <p><strong>Score:</strong> <span id="total-score">0</span></p>
           </div>
           <div class="submitted-words-container" id="submitted-words-container">
             <table id="submitted-words-table">
@@ -35,20 +35,21 @@
           </div>
         </div>
 
-        <!-- RIGHT COLUMN: staging word + letters + controls -->
+        <!-- RIGHT COLUMN: bottom-aligned staging + letters + buttons -->
         <div class="right-col">
-          <!-- Staging area at the top -->
-          <div id="staging-word" class="staging-word"></div>
+          <div class="right-col-inner">
+            <!-- Staging word area at top of the right column (or you can move it down if you prefer) -->
+            <div id="staging-word" class="staging-word"></div>
 
-          <!-- Letter tiles (lower right) -->
-          <div id="letters-container" class="letters-container"></div>
+            <!-- Letter tiles at the bottom, including the backspace tile -->
+            <div id="letters-container" class="letters-container"></div>
 
-          <!-- Buttons below the letter tiles -->
-          <div class="controls">
-            <button id="submit-word" class="btn btn-submit">Submit</button>
-            <button id="clear-word" class="btn btn-clear">Clear</button>
-            <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
-            <div id="word-feedback" class="feedback"></div>
+            <!-- Buttons below letter tiles -->
+            <div class="controls">
+              <button id="submit-word" class="btn btn-submit">Submit</button>
+              <button id="trade-letter" class="btn btn-trade disabled">Trade</button>
+              <div id="word-feedback" class="feedback"></div>
+            </div>
           </div>
         </div>
       </div>

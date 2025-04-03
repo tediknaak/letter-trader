@@ -95,27 +95,27 @@ async function loadDictionary() {
       return;
     }
     
-    // Ensure the dictionary is loaded before validating
+    // Capture the word and convert to uppercase
+    const word = window.stagingWord.toUpperCase();
+    
+    // Immediately clear the staging area
+    clearStagingWord();
+    
+    // Ensure the dictionary is loaded
     if (!window.dictionary) {
       document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
       return;
     }
     
-    // Convert the staged word to uppercase
-    const word = window.stagingWord.toUpperCase();
-    
-    // Validate that the word is in the dictionary
+    // Validate the word against the dictionary
     if (!window.dictionary.includes(word)) {
       document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
       return;
     }
     
-    // If the word is valid, log it and display a confirmation
+    // If the word is valid, log it and update the feedback
     console.log('Submitted word:', word);
     document.getElementById('word-feedback').innerText = `Valid submission: ${word}`;
-    
-    // Clear the staging area after submission
-    clearStagingWord();
   }
   
   // Set up event listeners for control buttons

@@ -16,12 +16,13 @@ function getTodayDateString() {
 // Function to fetch today's letters from Supabase
 async function fetchDailyLetters() {
   const todayStr = getTodayDateString();
+    console.log('Today string is:', todayStr);
   // Query the daily_letters table for today’s date
   const { data, error } = await supabase
     .from('daily_letters')
     .select('letters')
     .eq('puzzle_date', todayStr)
-    .single();  // Expect a single row per day
+   // .single();  // Expect a single row per day
   
   if (error) {
     console.error('Error fetching daily letters:', error);

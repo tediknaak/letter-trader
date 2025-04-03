@@ -13,7 +13,21 @@ function getTodayDateString() {
   return `${today.getFullYear()}-${month}-${day}`;
 }
 
-async function fetchDailyLetters() {
+// Load the dictionary from dictionary.json
+async function loadDictionary() {
+    try {
+      const response = await fetch('dictionary.json');
+      const data = await response.json();
+      // Assuming words in dictionary.json are already in uppercase
+      window.dictionary = data;
+      console.log('Dictionary loaded:', window.dictionary);
+    } catch (err) {
+      console.error('Error loading dictionary:', err);
+    }
+  }
+  
+  // Fetch daily letters from Supabase and render them as clickable buttons
+  async function fetchDailyLetters() {
     const todayStr = getTodayDateString();
     const { data, error } = await supabase
       .from('daily_letters')
@@ -28,24 +42,24 @@ async function fetchDailyLetters() {
     }
   
     if (data && data.letters) {
-      // Split the letters, convert them to uppercase, and store globally
+      // Split, trim, and convert letters to uppercase
       const letterArray = data.letters.split(',').map(letter => letter.trim().toUpperCase());
       window.allowedLetters = letterArray;
-      // Render letter buttons in the UI
       renderLetterButtons(letterArray);
     } else {
       document.getElementById('letters-container').innerText = 'No letters found for today.';
     }
   }
   
+  // Render each allowed letter as a clickable button
   function renderLetterButtons(letterArray) {
     const container = document.getElementById('letters-container');
-    container.innerHTML = ''; // Clear existing content
+    container.innerHTML = ''; // Clear any existing content
     letterArray.forEach(letter => {
       const btn = document.createElement('button');
       btn.classList.add('letter-button');
       btn.innerText = letter;
-      // On click, append the letter to the staging word
+      // When clicked, add the letter to the staging word
       btn.addEventListener('click', () => {
         appendLetterToStaging(letter);
       });
@@ -53,13 +67,13 @@ async function fetchDailyLetters() {
     });
   }
   
-  // Update the staging word display
+  // Update the staging word display area
   function updateStagingDisplay() {
     const stagingDisplay = document.getElementById('staging-word');
     stagingDisplay.innerText = window.stagingWord || '';
   }
   
-  // Append a letter to the staging word (allow duplicates)
+  // Append a letter to the staging word (allowing duplicates)
   function appendLetterToStaging(letter) {
     if (!window.stagingWord) {
       window.stagingWord = '';
@@ -68,27 +82,46 @@ async function fetchDailyLetters() {
     updateStagingDisplay();
   }
   
-  // Clear the staging word
+  // Clear the staging word area
   function clearStagingWord() {
     window.stagingWord = '';
     updateStagingDisplay();
   }
   
-  // Handle word submission
+  // Handle submission of the staged word with dictionary validation
   function submitStagingWord() {
     if (!window.stagingWord || window.stagingWord.length === 0) {
       document.getElementById('word-feedback').innerText = 'No word to submit!';
       return;
     }
-    console.log('Submitted word:', window.stagingWord);
-    document.getElementById('word-feedback').innerText = `You submitted: ${window.stagingWord}`;
-    // After submission, clear the staging word
+    
+    // Ensure the dictionary is loaded before validating
+    if (!window.dictionary) {
+      document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
+      return;
+    }
+    
+    // Convert the staged word to uppercase
+    const word = window.stagingWord.toUpperCase();
+    
+    // Validate that the word is in the dictionary
+    if (!window.dictionary.includes(word)) {
+      document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
+      return;
+    }
+    
+    // If the word is valid, log it and display a confirmation
+    console.log('Submitted word:', word);
+    document.getElementById('word-feedback').innerText = `Valid submission: ${word}`;
+    
+    // Clear the staging area after submission
     clearStagingWord();
   }
   
-  // Set up event listeners for the control buttons
+  // Set up event listeners for control buttons
   document.getElementById('clear-word').addEventListener('click', clearStagingWord);
   document.getElementById('submit-word').addEventListener('click', submitStagingWord);
   
-  // Fetch the daily letters when the page loads
+  // When the page loads, fetch daily letters and load the dictionary
   fetchDailyLetters();
+  loadDictionary();

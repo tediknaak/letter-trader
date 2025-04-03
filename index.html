@@ -3,23 +3,26 @@
   <head>
     <title>Letter Trader</title>
     <link rel="stylesheet" href="style.css" />
-=    <!-- Load the UMD version of Supabase v2 -->
+    <!-- Load the UMD version of Supabase v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   </head>
   <body>
     <h1>Letter Trader</h1>
-    <div id="daily-letters">Loading daily letters...</div>
+    <!-- Container for clickable letter buttons -->
+    <div id="letters-container">Loading daily letters...</div>
 
-    <!-- Word submission form -->
-    <form id="word-form">
-      <input type="text" id="word-input" placeholder="Enter a word" required />
-      <button type="submit">Submit Word</button>
-    </form>
+    <!-- Staging area to show the word being built -->
+    <div id="staging-word" class="staging-word"></div>
 
-    <!-- Feedback / Accepted words area -->
+    <!-- Control buttons: Clear and Submit -->
+    <div id="word-controls">
+      <button id="clear-word">Clear</button>
+      <button id="submit-word">Submit Word</button>
+    </div>
+
+    <!-- Feedback / accepted words area -->
     <div id="word-feedback"></div>
 
-    <!-- Then load your main.js -->
     <script src="main.js"></script>
   </body>
 </html>

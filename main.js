@@ -13,77 +13,82 @@ function getTodayDateString() {
   return `${today.getFullYear()}-${month}-${day}`;
 }
 
-// Function to fetch today's letters from Supabase
 async function fetchDailyLetters() {
-  const todayStr = getTodayDateString();
-    console.log('Today string is:', todayStr);
-  // Query the daily_letters table for today’s date
-  const { data, error } = await supabase
-    .from('daily_letters')
-    .select('letters')
-    .eq('puzzle_date', todayStr)
-    .single();  // Expect a single row per day
+    const todayStr = getTodayDateString();
+    const { data, error } = await supabase
+      .from('daily_letters')
+      .select('letters')
+      .eq('puzzle_date', todayStr)
+      .single();
   
-  if (error) {
-    console.error('Error fetching daily letters:', error);
-    document.getElementById('daily-letters').innerText = 'Error loading daily letters.';
-    return;
+    if (error) {
+      console.error('Error fetching daily letters:', error);
+      document.getElementById('letters-container').innerText = 'Error loading daily letters.';
+      return;
+    }
+  
+    if (data && data.letters) {
+      // Split the letters, convert them to uppercase, and store globally
+      const letterArray = data.letters.split(',').map(letter => letter.trim().toUpperCase());
+      window.allowedLetters = letterArray;
+      // Render letter buttons in the UI
+      renderLetterButtons(letterArray);
+    } else {
+      document.getElementById('letters-container').innerText = 'No letters found for today.';
+    }
   }
   
-  // If data is found, split the letters and display them
-  if (data && data.letters) {
-    // Split the letters, convert to uppercase, and store them globally
-    const letterArray = data.letters.split(',').map(letter => letter.trim().toUpperCase());
-    window.allowedLetters = letterArray;
-    document.getElementById('daily-letters').innerText = 'Today\'s Letters: ' + window.allowedLetters.join(' ');
-  } else {
-    document.getElementById('daily-letters').innerText = 'No letters found for today.';
-  }
-}
-
-// Fetch the daily letters when the page loads
-fetchDailyLetters();
-
-// Helper function: Check if the word uses only allowed letters
-function isWordUsingAllowedLetters(word, allowedLetters) {
-    // Convert the word to uppercase for a case-insensitive comparison
-    word = word.toUpperCase();
-    // Check that every letter in the word is in the allowedLetters array
-    return [...word].every(letter => allowedLetters.includes(letter));
-  }
-
-// -----------------------
-// Word Submission UI Logic
-// -----------------------
-
-// Get references to the form and input elements
-const wordForm = document.getElementById('word-form');
-const wordInput = document.getElementById('word-input');
-const wordFeedback = document.getElementById('word-feedback');
-
-// Listen for form submission
-wordForm.addEventListener('submit', function (e) {
-  e.preventDefault(); // Prevent the form from reloading the page
-  
-  // Get the word value and trim any extra whitespace
-  const submittedWord = wordInput.value.trim();
-
-   // Ensure the allowed letters have been loaded
-   if (!window.allowedLetters) {
-    wordFeedback.innerText = "Allowed letters not loaded yet. Please try again later.";
-    return;
+  function renderLetterButtons(letterArray) {
+    const container = document.getElementById('letters-container');
+    container.innerHTML = ''; // Clear existing content
+    letterArray.forEach(letter => {
+      const btn = document.createElement('button');
+      btn.classList.add('letter-button');
+      btn.innerText = letter;
+      // On click, append the letter to the staging word
+      btn.addEventListener('click', () => {
+        appendLetterToStaging(letter);
+      });
+      container.appendChild(btn);
+    });
   }
   
-  // Validate that the submitted word contains only allowed letters
-  if (!isWordUsingAllowedLetters(submittedWord, window.allowedLetters)) {
-    wordFeedback.innerText = "Invalid word: Please use only the allowed letters: " + window.allowedLetters.join(' ');
-    return;
+  // Update the staging word display
+  function updateStagingDisplay() {
+    const stagingDisplay = document.getElementById('staging-word');
+    stagingDisplay.innerText = window.stagingWord || '';
   }
   
-  // If we pass the validation, log the word and update feedback
-  console.log('Submitted word:', submittedWord);
-  wordFeedback.innerText = `Valid submission: ${submittedWord}`;
+  // Append a letter to the staging word (allow duplicates)
+  function appendLetterToStaging(letter) {
+    if (!window.stagingWord) {
+      window.stagingWord = '';
+    }
+    window.stagingWord += letter;
+    updateStagingDisplay();
+  }
   
-  // Clear the input for the next word
-  wordInput.value = '';
-});
+  // Clear the staging word
+  function clearStagingWord() {
+    window.stagingWord = '';
+    updateStagingDisplay();
+  }
+  
+  // Handle word submission
+  function submitStagingWord() {
+    if (!window.stagingWord || window.stagingWord.length === 0) {
+      document.getElementById('word-feedback').innerText = 'No word to submit!';
+      return;
+    }
+    console.log('Submitted word:', window.stagingWord);
+    document.getElementById('word-feedback').innerText = `You submitted: ${window.stagingWord}`;
+    // After submission, clear the staging word
+    clearStagingWord();
+  }
+  
+  // Set up event listeners for the control buttons
+  document.getElementById('clear-word').addEventListener('click', clearStagingWord);
+  document.getElementById('submit-word').addEventListener('click', submitStagingWord);
+  
+  // Fetch the daily letters when the page loads
+  fetchDailyLetters();

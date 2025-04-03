@@ -1,0 +1,70 @@
+/* Mobile-first global styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f2f2f2;
+    color: #333;
+    text-align: center;
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+  }
+  
+  /* Container for the letter buttons */
+  #letters-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  
+  /* Style for each clickable letter button */
+  .letter-button {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+  }
+  
+  .letter-button:active {
+    background-color: #ddd;
+  }
+  
+  /* Staging area for the built word */
+  #staging-word {
+    font-size: 32px;
+    margin-bottom: 20px;
+    min-height: 40px;
+  }
+  
+  /* Control buttons for clearing and submitting */
+  #word-controls button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+    transition: background-color 0.2s;
+  }
+  
+  #word-controls button:active {
+    background-color: #555;
+  }
+  
+  /* Feedback area */
+  #word-feedback {
+    margin-top: 20px;
+    font-size: 18px;
+  }

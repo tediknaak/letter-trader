@@ -225,7 +225,7 @@ function updateSubmittedWordsDisplay() {
     // Update words-submitted count
     document.getElementById('words-submitted-count').textContent = window.validWords.length;
   }
-  
+
 /* --- TRADE FLOW --- */
 function enableTradeMode() {
   window.tradeMode = true;
@@ -339,7 +339,6 @@ function closeTradeOverlay() {
 
 /* --- EVENT LISTENERS --- */
 document.getElementById('submit-word').addEventListener('click', submitStagingWord);
-document.getElementById('clear-word').addEventListener('click', clearStagingWord);
 document.getElementById('trade-letter').addEventListener('click', enableTradeMode);
 
 // Trade overlay buttons

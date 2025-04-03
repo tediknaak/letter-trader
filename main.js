@@ -5,18 +5,19 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // Initialize the Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Global variables for allowed letters, staging word, valid words, total score, and trade tracking
-window.allowedLetters = [];           // current letter set
-window.usedLetters = [];              // all letters that have ever been in the set (initial + traded in)
+window.allowedLetters = [];
+window.usedLetters = [];
 window.stagingWord = '';
-window.validWords = [];               // array of objects: { word, score }
+window.validWords = [];
 window.totalScore = 0;
-window.validWordsSinceTrade = 0;      // counter since last trade
-window.tradeMode = false;             // flag for trade mode
-window.tradeLog = [];                 // array of trade objects: { from, to, timestamp }
-window.letterToTrade = null;          // the letter user has selected to trade
+window.validWordsSinceTrade = 0;
 
-// Define the point values for each letter (range 1-10)
+// Trade variables
+window.tradeMode = false;
+window.letterToTrade = null;     // The letter in the current set being traded away
+window.letterToTradeNew = null;  // The new letter the user selected
+window.tradeLog = [];
+
 const letterScores = {
   A: 1, B: 3, C: 3, D: 2, E: 1,
   F: 4, G: 2, H: 4, I: 1, J: 8,
@@ -25,7 +26,7 @@ const letterScores = {
   U: 1, V: 4, W: 4, X: 10, Y: 4, Z: 10
 };
 
-// Function to compute score for a word
+// Utility: compute word score
 function computeScore(word) {
   let sum = 0;
   for (const char of word) {
@@ -34,27 +35,26 @@ function computeScore(word) {
   return sum * word.length;
 }
 
-// Utility: Get today's date in YYYY-MM-DD format
 function getTodayDateString() {
   const today = new Date();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${today.getFullYear()}-${month}-${day}`;
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${m}-${d}`;
 }
 
-// Load the dictionary from dictionary.json
+// Load dictionary
 async function loadDictionary() {
   try {
-    const response = await fetch('dictionary.json');
-    const data = await response.json();
+    const res = await fetch('dictionary.json');
+    const data = await res.json();
     window.dictionary = data;
-    console.log('Dictionary loaded:', window.dictionary.length, "words");
+    console.log('Dictionary loaded:', data.length, 'words');
   } catch (err) {
     console.error('Error loading dictionary:', err);
   }
 }
 
-// Fetch daily letters from Supabase and render them as clickable buttons
+// Fetch daily letters
 async function fetchDailyLetters() {
   const todayStr = getTodayDateString();
   const { data, error } = await supabase
@@ -70,10 +70,8 @@ async function fetchDailyLetters() {
   }
 
   if (data && data.letters) {
-    // Process letters: split, trim, uppercase
-    const letterArray = data.letters.split(',').map(letter => letter.trim().toUpperCase());
+    const letterArray = data.letters.split(',').map(l => l.trim().toUpperCase());
     window.allowedLetters = letterArray;
-    // Initially, mark all starting letters as used
     window.usedLetters = [...letterArray];
     renderLetterButtons(letterArray);
   } else {
@@ -81,21 +79,18 @@ async function fetchDailyLetters() {
   }
 }
 
-// Render clickable letter buttons.
-// If tradeMode is active, clicking a letter initiates a trade.
+/* --- RENDER LETTER BUTTONS --- */
 function renderLetterButtons(letterArray) {
   const container = document.getElementById('letters-container');
-  container.innerHTML = ''; // Clear existing content
+  container.innerHTML = '';
+
   letterArray.forEach(letter => {
-    const btn = document.createElement('button');
-    btn.classList.add('letter-button');
-    btn.innerText = letter;
-    btn.addEventListener('click', () => {
+    const btn = createLetterTile(letter, () => {
+      // If in trade mode, pick this letter as letterToTrade
       if (window.tradeMode) {
-        // In trade mode, clicking a letter initiates a trade for that letter
-        initiateTrade(letter);
+        pickLetterToTrade(letter);
       } else {
-        // Normal mode: append letter to staging word
+        // Otherwise, append to staging word
         appendLetterToStaging(letter);
       }
     });
@@ -103,153 +98,206 @@ function renderLetterButtons(letterArray) {
   });
 }
 
-// Update staging word display
-function updateStagingDisplay() {
-  const stagingDisplay = document.getElementById('staging-word');
-  stagingDisplay.innerText = window.stagingWord || '';
+/* --- CREATE A LETTER TILE WITH POINTS --- */
+function createLetterTile(letter, onClick) {
+  // We'll make it a button with the letter & its points
+  const btn = document.createElement('button');
+  btn.classList.add('letter-button');
+  btn.innerHTML = `
+    <span class="letter-main">${letter}</span>
+    <span class="letter-points">${letterScores[letter] || 0}</span>
+  `;
+  btn.addEventListener('click', onClick);
+  return btn;
 }
 
-// Append a letter to the staging word
+/* --- STAGING WORD --- */
 function appendLetterToStaging(letter) {
   window.stagingWord = (window.stagingWord || '') + letter;
   updateStagingDisplay();
 }
 
-// Clear the staging word
+function updateStagingDisplay() {
+  document.getElementById('staging-word').innerText = window.stagingWord || '';
+}
+
 function clearStagingWord() {
   window.stagingWord = '';
   updateStagingDisplay();
 }
 
-// Update the display of submitted words and total score
-function updateSubmittedWordsDisplay() {
-  const listContainer = document.getElementById('submitted-words-list');
-  listContainer.innerHTML = ''; // Clear current list
-  window.validWords.forEach(item => {
-    const li = document.createElement('li');
-    li.innerText = `${item.word} (Score: ${item.score})`;
-    listContainer.appendChild(li);
-  });
-  document.getElementById('total-score').innerText = `Total Score: ${window.totalScore}`;
-}
-
-// Handle submission of the staged word: validate, score, update counters.
+/* --- SUBMIT WORD --- */
 function submitStagingWord() {
-  if (!window.stagingWord || window.stagingWord.length === 0) {
+  if (!window.stagingWord) {
     document.getElementById('word-feedback').innerText = 'No word to submit!';
     return;
   }
-  
   const word = window.stagingWord.toUpperCase();
   clearStagingWord();
-  
+
   if (!window.dictionary) {
-    document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
+    document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet.';
     return;
   }
-  
   if (!window.dictionary.includes(word)) {
     document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
     return;
   }
-  
-  if (window.validWords.some(item => item.word === word)) {
-    document.getElementById('word-feedback').innerText = `Word "${word}" has already been submitted!`;
+  if (window.validWords.some(w => w.word === word)) {
+    document.getElementById('word-feedback').innerText = `Word "${word}" already submitted!`;
     return;
   }
-  
+
   const score = computeScore(word);
   window.validWords.push({ word, score });
   window.totalScore += score;
-  window.validWordsSinceTrade++;  // Increment counter for trade unlocking
-  
-  console.log('Submitted word:', word, 'Score:', score);
-  document.getElementById('word-feedback').innerText = `Valid submission: ${word} (Score: ${score})`;
+  window.validWordsSinceTrade++;
+
+  document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
   updateSubmittedWordsDisplay();
-  
-  // Check if 10 words have been submitted since last trade; if so, show the trade button.
+
+  // Unlock trade if user hits 10 words since last trade
   if (window.validWordsSinceTrade >= 10) {
     document.getElementById('trade-letter').style.display = 'inline-block';
   }
 }
 
-// ========================
-// TRADING FUNCTIONS
-// ========================
-
-// Called when in trade mode and the user clicks a letter in their allowed set.
-// This records the letter to be traded away and displays available trade options.
-function initiateTrade(letter) {
-  window.letterToTrade = letter;
-  document.getElementById('trade-feedback').innerText = `Trading letter: ${letter}. Select a new letter:`;
-  displayTradeOptions();
-}
-
-// Displays available letters (A-Z minus those in window.usedLetters) as clickable buttons.
-function displayTradeOptions() {
-  const tradeOptionsContainer = document.getElementById('trade-options');
-  tradeOptionsContainer.innerHTML = '';  // Clear previous options
-  
-  // Get available letters: all letters A-Z that are NOT in usedLetters.
-  const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
-  const availableLetters = allLetters.filter(l => !window.usedLetters.includes(l));
-  
-  availableLetters.forEach(letter => {
-    const btn = document.createElement('button');
-    btn.classList.add('trade-option-button');
-    btn.innerText = letter;
-    btn.addEventListener('click', () => {
-      executeTrade(letter);
-    });
-    tradeOptionsContainer.appendChild(btn);
+/* --- DISPLAY SUBMITTED WORDS & SCORE --- */
+function updateSubmittedWordsDisplay() {
+  document.getElementById('total-score').innerText = window.totalScore;
+  const listEl = document.getElementById('submitted-words-list');
+  listEl.innerHTML = '';
+  window.validWords.forEach(({ word, score }) => {
+    const li = document.createElement('li');
+    li.textContent = `${word} (${score})`;
+    listEl.appendChild(li);
   });
 }
 
-// Executes the trade: replaces window.letterToTrade in allowedLetters with the new letter,
-// updates usedLetters and logs the trade, then resets trade mode.
-function executeTrade(newLetter) {
-  // Replace the traded letter in allowedLetters
-  const index = window.allowedLetters.indexOf(window.letterToTrade);
-  if (index !== -1) {
-    window.allowedLetters[index] = newLetter;
+/* --- TRADE FLOW --- */
+function enableTradeMode() {
+  window.tradeMode = true;
+  window.letterToTrade = null;
+  window.letterToTradeNew = null;
+
+  // Show overlay
+  document.getElementById('trade-overlay').classList.remove('hidden');
+
+  // Clear any old content
+  document.getElementById('trade-confirmation').classList.add('hidden');
+  document.getElementById('trade-summary').textContent = '';
+  document.getElementById('trade-options').innerHTML = '';
+
+  // The user will click a letter in the main set to choose letterToTrade
+  // Then we’ll show available letters.
+  document.getElementById('word-feedback').innerText = 'Select a letter in your set to trade away.';
+}
+
+function pickLetterToTrade(letter) {
+  // Step 1: user picks which letter they want to remove
+  window.letterToTrade = letter;
+
+  // Step 2: show trade options in the overlay
+  showTradeOptions();
+  document.getElementById('word-feedback').innerText = `Now choose a new letter to replace "${letter}".`;
+}
+
+/* Show letters A–Z except those in usedLetters. */
+function showTradeOptions() {
+  const tradeOptionsEl = document.getElementById('trade-options');
+  tradeOptionsEl.innerHTML = '';
+
+  const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const availableLetters = allLetters.filter(l => !window.usedLetters.includes(l));
+
+  availableLetters.forEach(l => {
+    const btn = createTradeOptionTile(l, () => {
+      pickNewLetterForTrade(l);
+    });
+    tradeOptionsEl.appendChild(btn);
+  });
+}
+
+/* Create a trade-option tile with letter & points */
+function createTradeOptionTile(letter, onClick) {
+  const btn = document.createElement('button');
+  btn.classList.add('trade-option-button');
+  btn.innerHTML = `
+    <span class="letter-main">${letter}</span>
+    <span class="letter-points">${letterScores[letter] || 0}</span>
+  `;
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
+/* User picks the new letter to trade to */
+function pickNewLetterForTrade(newLetter) {
+  window.letterToTradeNew = newLetter;
+
+  // Show confirmation step
+  const fromPoints = letterScores[window.letterToTrade] || 0;
+  const toPoints = letterScores[newLetter] || 0;
+  const summary = `Trade: ${window.letterToTrade} (${fromPoints}) → ${newLetter} (${toPoints})`;
+  
+  document.getElementById('trade-summary').textContent = summary;
+  document.getElementById('trade-confirmation').classList.remove('hidden');
+}
+
+/* Finalize the trade when user clicks "Go!" */
+function confirmTrade() {
+  const from = window.letterToTrade;
+  const to = window.letterToTradeNew;
+  if (!from || !to) return;
+
+  // Replace in allowedLetters
+  const idx = window.allowedLetters.indexOf(from);
+  if (idx !== -1) {
+    window.allowedLetters[idx] = to;
   }
-  
-  // Add the new letter to usedLetters
-  window.usedLetters.push(newLetter);
-  
+
+  // Mark 'to' as used
+  window.usedLetters.push(to);
+
   // Log the trade
   window.tradeLog.push({
-    from: window.letterToTrade,
-    to: newLetter,
+    from,
+    to,
     timestamp: new Date().toISOString()
   });
-  
-  // Exit trade mode and reset trade-related counters
-  window.tradeMode = false;
+
+  // Reset counters & close trade mode
   window.validWordsSinceTrade = 0;
+  window.tradeMode = false;
   window.letterToTrade = null;
-  
-  // Hide trade options and trade button, and update UI
-  document.getElementById('trade-options').innerHTML = '';
-  document.getElementById('trade-feedback').innerText = `Trade complete: swapped letter.`;
+  window.letterToTradeNew = null;
+
+  // Hide trade button again
   document.getElementById('trade-letter').style.display = 'none';
-  
-  // Re-render the allowed letters UI
+
+  // Update UI
   renderLetterButtons(window.allowedLetters);
+  document.getElementById('word-feedback').innerText = `Trade complete: ${from} → ${to}`;
+  closeTradeOverlay();
 }
 
-// Event listener for the "Trade Letter" button. Activates trade mode.
-document.getElementById('trade-letter').addEventListener('click', () => {
-  window.tradeMode = true;
-  document.getElementById('trade-feedback').innerText = 'Trade mode activated: Click a letter in your set to trade away.';
+/* Cancel or close the trade overlay */
+function closeTradeOverlay() {
+  document.getElementById('trade-overlay').classList.add('hidden');
+}
+
+/* --- EVENT LISTENERS --- */
+document.getElementById('submit-word').addEventListener('click', submitStagingWord);
+document.getElementById('clear-word').addEventListener('click', clearStagingWord);
+document.getElementById('trade-letter').addEventListener('click', enableTradeMode);
+
+// Trade overlay buttons
+document.getElementById('confirm-trade').addEventListener('click', confirmTrade);
+document.getElementById('close-trade-overlay').addEventListener('click', () => {
+  // If user closes overlay, we cancel trade mode
+  window.tradeMode = false;
+  closeTradeOverlay();
 });
 
-// ========================
-// Set up event listeners for normal controls
-document.getElementById('clear-word').addEventListener('click', clearStagingWord);
-document.getElementById('submit-word').addEventListener('click', submitStagingWord);
-
-// ========================
-// Initialization: fetch letters and load dictionary
+// Init
 fetchDailyLetters();
 loadDictionary();

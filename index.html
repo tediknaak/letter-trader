@@ -1,43 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Letter Trader</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Load the UMD version of Supabase v2 -->
+    <!-- Supabase client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   </head>
   <body>
-    <h1>Letter Trader</h1>
-    
-    <!-- Allowed letters area -->
-    <div id="letters-container">Loading daily letters...</div>
-    
-    <!-- Staging area for building a word -->
-    <div id="staging-word" class="staging-word"></div>
-    
-    <!-- Control buttons for word submission -->
-    <div id="word-controls">
-      <button id="clear-word">Clear</button>
-      <button id="submit-word">Submit Word</button>
+    <div class="container">
+      <!-- Header / Title -->
+      <header>
+        <h1>Letter Trader</h1>
+      </header>
+
+      <!-- Scoreboard & Submitted Words -->
+      <section class="scoreboard">
+        <div class="score-display">
+          <span id="total-score" class="total-score">0</span>
+          <label>Points</label>
+        </div>
+        <div class="submitted-words">
+          <h2>Words Submitted</h2>
+          <ul id="submitted-words-list"></ul>
+        </div>
+      </section>
+
+      <!-- Letters & Staging Area -->
+      <section class="letters-section">
+        <div id="letters-container" class="letters-container">
+          <!-- Dynamically populated by JS -->
+        </div>
+        <div id="staging-word" class="staging-word">
+          <!-- Current word being built -->
+        </div>
+      </section>
+
+      <!-- Controls & Feedback -->
+      <section class="controls">
+        <button id="submit-word" class="btn btn-submit">Submit</button>
+        <button id="clear-word" class="btn btn-clear">Clear</button>
+        <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
+
+        <div id="word-feedback" class="feedback"></div>
+      </section>
     </div>
-    
-    <!-- Feedback for word submissions -->
-    <div id="word-feedback"></div>
-    
-    <!-- Total score display -->
-    <div id="total-score" class="total-score">Total Score: 0</div>
-    
-    <!-- Container for submitted words -->
-    <div id="submitted-words" class="submitted-words">
-      <h2>Submitted Words</h2>
-      <ul id="submitted-words-list"></ul>
+
+    <!-- Trade Overlay (hidden by default) -->
+    <div id="trade-overlay" class="trade-overlay hidden">
+      <div class="trade-popup">
+        <p class="trade-instructions">Select a letter <em>in your set</em> to trade away, then choose a new letter below.</p>
+        
+        <!-- Where we show available letters to trade to -->
+        <div id="trade-options" class="trade-options"></div>
+
+        <!-- Confirmation step: "Trade: B (3) -> T (1) [Go!]" -->
+        <div id="trade-confirmation" class="trade-confirmation hidden">
+          <p id="trade-summary"></p>
+          <button id="confirm-trade" class="btn btn-submit">Go!</button>
+        </div>
+
+        <button id="close-trade-overlay" class="btn btn-close-trade">Close</button>
+      </div>
     </div>
-    
-    <!-- Trade controls -->
-    <button id="trade-letter" style="display: none;">Trade Letter</button>
-    <div id="trade-feedback"></div>
-    <div id="trade-options"></div>
-    
+
     <script src="main.js"></script>
   </body>
 </html>

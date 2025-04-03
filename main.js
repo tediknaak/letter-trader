@@ -41,3 +41,29 @@ async function fetchDailyLetters() {
 
 // Fetch the daily letters when the page loads
 fetchDailyLetters();
+
+// -----------------------
+// Word Submission UI Logic
+// -----------------------
+
+// Get references to the form and input elements
+const wordForm = document.getElementById('word-form');
+const wordInput = document.getElementById('word-input');
+const wordFeedback = document.getElementById('word-feedback');
+
+// Listen for form submission
+wordForm.addEventListener('submit', function (e) {
+  e.preventDefault(); // Prevent the form from reloading the page
+  
+  // Get the word value and trim any extra whitespace
+  const submittedWord = wordInput.value.trim();
+  
+  // For now, simply log the word to the console and display it
+  console.log('Submitted word:', submittedWord);
+  
+  // Display feedback (you can later change this to show validation messages)
+  wordFeedback.innerText = `You submitted: ${submittedWord}`;
+  
+  // Clear the input for the next word
+  wordInput.value = '';
+});

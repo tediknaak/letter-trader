@@ -106,39 +106,45 @@ function updateSubmittedWordsDisplay() {
 
 // Handle submission of the staged word with dictionary validation
 function submitStagingWord() {
-  if (!window.stagingWord || window.stagingWord.length === 0) {
-    document.getElementById('word-feedback').innerText = 'No word to submit!';
-    return;
+    if (!window.stagingWord || window.stagingWord.length === 0) {
+      document.getElementById('word-feedback').innerText = 'No word to submit!';
+      return;
+    }
+    
+    // Capture the staged word and convert it to uppercase
+    const word = window.stagingWord.toUpperCase();
+    
+    // Immediately clear the staging word area
+    clearStagingWord();
+    
+    // Ensure the dictionary is loaded
+    if (!window.dictionary) {
+      document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
+      return;
+    }
+    
+    // Validate the word against the dictionary
+    if (!window.dictionary.includes(word)) {
+      document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
+      return;
+    }
+    
+    // Check for duplicate submission
+    if (window.validWords.includes(word)) {
+      document.getElementById('word-feedback').innerText = `Word "${word}" has already been submitted!`;
+      return;
+    }
+    
+    // If the word is valid and not a duplicate, add it to the list of valid words
+    window.validWords.push(word);
+    
+    // Log the submission and update the feedback
+    console.log('Submitted word:', word);
+    document.getElementById('word-feedback').innerText = `Valid submission: ${word}`;
+    
+    // Refresh the display of submitted words
+    updateSubmittedWordsDisplay();
   }
-  
-  // Capture the staged word and convert it to uppercase
-  const word = window.stagingWord.toUpperCase();
-  
-  // Immediately clear the staging word area
-  clearStagingWord();
-  
-  // Ensure the dictionary is loaded
-  if (!window.dictionary) {
-    document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet. Please try again later.';
-    return;
-  }
-  
-  // Validate the word against the dictionary
-  if (!window.dictionary.includes(word)) {
-    document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
-    return;
-  }
-  
-  // If the word is valid, add it to the list of valid words
-  window.validWords.push(word);
-  
-  // Log the submission and update the feedback
-  console.log('Submitted word:', word);
-  document.getElementById('word-feedback').innerText = `Valid submission: ${word}`;
-  
-  // Refresh the display of submitted words
-  updateSubmittedWordsDisplay();
-}
 
 // Set up event listeners for control buttons
 document.getElementById('clear-word').addEventListener('click', clearStagingWord);

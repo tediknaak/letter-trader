@@ -6,46 +6,57 @@
   }
   body {
     font-family: Arial, sans-serif;
-    background: #f9f9f9;
+    background: #fff; /* White background */
     color: #333;
+    margin: 0;
     padding: 0;
   }
   
-  /* --- Container --- */
+  /* Container: narrow for mobile, can expand if needed */
   .container {
-    max-width: 400px;
+    max-width: 420px;
     margin: 0 auto;
     padding: 1rem;
   }
   
-  /* --- Header --- */
+  /* Header */
   header {
     text-align: center;
     margin-bottom: 1rem;
   }
   header h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
   }
   
-  /* --- Main Layout: Two Columns --- */
+  /* Main 2-column layout */
   .main-layout {
     display: flex;
     gap: 1rem;
   }
-  .submitted-column {
+  
+  /* LEFT COL: scoreboard + table */
+  .left-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 6px;
-    padding: 0.5rem;
-    overflow: hidden;
+    /* No background or border so it's white on white */
+  }
+  .score-info {
+    font-size: 0.9rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .score-info p {
+    margin: 0.25rem 0;
+    font-weight: 500;
   }
   .submitted-words-container {
     flex: 1;
     overflow-y: auto;
-    margin-bottom: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
   }
   .submitted-words-container table {
     width: 100%;
@@ -53,45 +64,40 @@
   }
   .submitted-words-container th,
   .submitted-words-container td {
-    border: 1px solid #ddd;
-    padding: 0.5rem;
+    border: 1px solid #eee;
+    padding: 0.4rem;
+    font-size: 0.9rem;
     text-align: left;
   }
-  .score-display {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  .score-display .total-score {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #0077cc;
+  .submitted-words-container thead {
+    background: #f2f2f2;
   }
   
-  .letter-column {
+  /* RIGHT COL: staging, letters, controls */
+  .right-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 6px;
-    padding: 0.5rem;
+    /* no visible border or background */
   }
-  .letter-controls {
-    margin-bottom: 1rem;
+  .staging-word {
+    min-height: 40px;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
   }
   .letters-container {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: flex-end;
+    margin-bottom: 1rem;
   }
   
-  /* --- Letter Tiles (for both main set and trade options) --- */
-  .letter-button, .trade-option-button {
+  /* Letter tiles (main & trade) */
+  .letter-button,
+  .trade-option-button {
     position: relative;
     width: 50px;
     height: 50px;
@@ -116,16 +122,7 @@
     color: #555;
   }
   
-  /* --- Staging Word --- */
-  .staging-word {
-    margin-top: 1rem;
-    min-height: 40px;
-    font-size: 1.5rem;
-    text-align: center;
-    font-weight: bold;
-  }
-  
-  /* --- Controls Section --- */
+  /* Controls & Feedback */
   .controls {
     display: flex;
     flex-direction: column;
@@ -133,32 +130,37 @@
     gap: 0.5rem;
   }
   .btn {
-    padding: 0.75rem 1.25rem;
-    font-size: 1rem;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.95rem;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    font-weight: 500;
   }
   .btn-submit {
-    background-color: #28a745;
+    background-color: #5cb85c; /* closer to a green from your mockup */
     color: #fff;
   }
   .btn-clear {
-    background-color: #6c757d;
+    background-color: #6c757d; /* grey */
     color: #fff;
   }
   .btn-trade {
-    background-color: #ff9800;
+    background-color: #f0ad4e; /* orange */
+    color: #fff;
+  }
+  .btn-close-trade {
+    background-color: #dc3545; /* red */
     color: #fff;
   }
   .feedback {
-    margin-top: 0.5rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     min-height: 20px;
     text-align: center;
+    color: #555;
   }
   
-  /* --- Trade Overlay & Popup --- */
+  /* Trade overlay */
   .trade-overlay {
     position: fixed;
     top: 0;
@@ -193,4 +195,6 @@
   }
   .trade-instructions {
     margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #333;
   }

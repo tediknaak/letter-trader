@@ -166,6 +166,7 @@ function submitStagingWord() {
 function updateSubmittedWordsDisplay() {
     const tbody = document.getElementById('submitted-words-tbody');
     tbody.innerHTML = '';
+  
     window.validWords.forEach(item => {
       const tr = document.createElement('tr');
       const tdWord = document.createElement('td');
@@ -176,12 +177,16 @@ function updateSubmittedWordsDisplay() {
       tr.appendChild(tdPoints);
       tbody.appendChild(tr);
     });
-    // Auto-scroll to the bottom of the submitted words container:
+  
+    // Auto-scroll to the bottom so latest submission is visible
     const container = document.getElementById('submitted-words-container');
     container.scrollTop = container.scrollHeight;
   
     // Update the total score display
-    document.querySelector('.score-display .total-score').textContent = window.totalScore;
+    document.getElementById('total-score').textContent = window.totalScore;
+  
+    // Update the words-submitted count
+    document.getElementById('words-submitted-count').textContent = window.validWords.length;
   }
 
 /* --- TRADE FLOW --- */

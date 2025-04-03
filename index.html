@@ -14,12 +14,15 @@
         <h1>Letter Trader</h1>
       </header>
 
-      <!-- Main Layout: Two Columns -->
+      <!-- Main 2-column layout -->
       <div class="main-layout">
-        <!-- Left Column: Submitted Words -->
-        <div class="submitted-column">
-          <h2>Submitted Words</h2>
-          <div id="submitted-words-container" class="submitted-words-container">
+        <!-- LEFT COLUMN: scoreboard + submitted words -->
+        <div class="left-col">
+          <div class="score-info">
+            <p class="words-submitted">Words Submitted: <span id="words-submitted-count">0</span></p>
+            <p class="score">Score: <span id="total-score">0</span></p>
+          </div>
+          <div class="submitted-words-container" id="submitted-words-container">
             <table id="submitted-words-table">
               <thead>
                 <tr>
@@ -27,48 +30,37 @@
                   <th>Points</th>
                 </tr>
               </thead>
-              <tbody id="submitted-words-tbody">
-                <!-- Rows populated by JS -->
-              </tbody>
+              <tbody id="submitted-words-tbody"></tbody>
             </table>
-          </div>
-          <div class="score-display">
-            <span id="total-score" class="total-score">0</span>
-            <label>Points</label>
           </div>
         </div>
 
-        <!-- Right Column: Letter Building Area -->
-        <div class="letter-column">
-          <!-- Upper part: Staging area and controls -->
-          <div class="letter-controls">
-            <div id="staging-word" class="staging-word">
-              <!-- Staged word appears here -->
-            </div>
-            <div class="controls">
-              <button id="submit-word" class="btn btn-submit">Submit</button>
-              <button id="clear-word" class="btn btn-clear">Clear</button>
-              <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
-              <div id="word-feedback" class="feedback"></div>
-            </div>
-          </div>
-          <!-- Lower part: Letter tiles (aligned to the lower right) -->
-          <div id="letters-container" class="letters-container">
-            <!-- Letter tiles rendered here -->
+        <!-- RIGHT COLUMN: staging word + letters + controls -->
+        <div class="right-col">
+          <!-- Staging area at the top -->
+          <div id="staging-word" class="staging-word"></div>
+
+          <!-- Letter tiles (lower right) -->
+          <div id="letters-container" class="letters-container"></div>
+
+          <!-- Buttons below the letter tiles -->
+          <div class="controls">
+            <button id="submit-word" class="btn btn-submit">Submit</button>
+            <button id="clear-word" class="btn btn-clear">Clear</button>
+            <button id="trade-letter" class="btn btn-trade" style="display: none;">Trade</button>
+            <div id="word-feedback" class="feedback"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Trade Overlay (remains the same) -->
+    <!-- Trade Overlay (unchanged) -->
     <div id="trade-overlay" class="trade-overlay hidden">
       <div class="trade-popup">
         <p class="trade-instructions">
           Select a letter in your set to trade away, then choose a new letter below.
         </p>
-        <div id="trade-options" class="trade-options">
-          <!-- Trade options populated by JS -->
-        </div>
+        <div id="trade-options" class="trade-options"></div>
         <div id="trade-confirmation" class="trade-confirmation hidden">
           <p id="trade-summary"></p>
           <button id="confirm-trade" class="btn btn-submit">Go!</button>

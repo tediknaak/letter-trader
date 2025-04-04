@@ -87,6 +87,9 @@
     font-size: 0.9rem;
     text-align: left;
     padding: 0.4rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   .submitted-words-container td {
     font-size: 0.9rem;

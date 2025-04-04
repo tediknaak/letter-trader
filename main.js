@@ -173,6 +173,19 @@ function submitStagingWord() {
   window.totalScore += score;
   window.validWordsSinceTrade++;
 
+  //Update trade button progress color fill
+  function updateTradeButtonProgress() {
+    const tradeBtn = document.getElementById('trade-letter');
+    // Calculate progress as a percentage (max 100%)
+    const progress = Math.min(window.validWordsSinceTrade, 10) / 10 * 100;
+    
+    // Set the background as a left-to-right gradient:
+    // The left "progress" percentage is blue (using our accent blue), and the remainder is white.
+    tradeBtn.style.backgroundImage = `linear-gradient(to right, var(--accent-blue) 0%, var(--accent-blue) ${progress}%, #fff ${progress}%, #fff 100%)`;
+  }
+
+  updateTradeButtonProgress();
+
   // After each valid word submission
     function checkTradeEligibility() {
     const tradeBtn = document.getElementById('trade-letter');
@@ -191,6 +204,7 @@ function submitStagingWord() {
 
   document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
   updateSubmittedWordsDisplay();
+
 
   // Unlock trade if user hits 10 words since last trade
   if (window.validWordsSinceTrade >= 10) {
@@ -318,6 +332,7 @@ function confirmTrade() {
 
   // Reset counters & close trade mode
   window.validWordsSinceTrade = 0;
+  updateTradeButtonProgress();
   window.tradeMode = false;
   window.letterToTrade = null;
   window.letterToTradeNew = null;

@@ -101,6 +101,13 @@ function renderLetterButtons(letterArray) {
     // Use both classes so it inherits .letter-button’s size/position, plus the .backspace-button overrides
     backspaceTile.classList.add('letter-button', 'backspace-button');
 
+    function handleBackspace() {
+        if (window.stagingWord.length > 0) {
+          window.stagingWord = window.stagingWord.slice(0, -1);
+          updateStagingDisplay();
+        }
+      }
+
     backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
     backspaceTile.addEventListener('click', () => {
     if (!window.tradeMode) {
@@ -109,12 +116,7 @@ function renderLetterButtons(letterArray) {
     });
     container.appendChild(backspaceTile);
   
-  function handleBackspace() {
-    if (window.stagingWord.length > 0) {
-      window.stagingWord = window.stagingWord.slice(0, -1);
-      updateStagingDisplay();
-    }
-  }
+  
 
 /* --- CREATE A LETTER TILE WITH POINTS --- */
 function createLetterTile(letter, onClick) {

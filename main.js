@@ -98,19 +98,16 @@ function renderLetterButtons(letterArray) {
   
     // Now add a backspace tile
     const backspaceTile = document.createElement('button');
-    backspaceTile.classList.add('letter-button');
-    // Using the Unicode symbol for backspace (⌫) or you can use a custom icon
-    backspaceTile.innerHTML = `
-      <span class="letter-main">&#9003;</span>
-    `;
+    // Use both classes so it inherits .letter-button’s size/position, plus the .backspace-button overrides
+    backspaceTile.classList.add('letter-button', 'backspace-button');
+
+    backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
     backspaceTile.addEventListener('click', () => {
-      // Remove last character from stagingWord
-      if (!window.tradeMode) {
+    if (!window.tradeMode) {
         handleBackspace();
-      }
+    }
     });
     container.appendChild(backspaceTile);
-  }
   
   function handleBackspace() {
     if (window.stagingWord.length > 0) {

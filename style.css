@@ -1,6 +1,6 @@
 /* Define a custom property for the accent blue used throughout */
 :root {
-    --accent-blue: #2196f3; /* Adjust as you like */
+    --accent-blue: #aee7e7; /* Adjust as you like */
   }
   
   /* --- Global Resets & Body Styles --- */
@@ -163,7 +163,7 @@
   /* Submit in accent blue */
   .btn-submit {
     background-color: var(--accent-blue);
-    color: #fff;
+    color: #000;
   }
   /* Trade button states */
   .btn-trade {
@@ -176,7 +176,7 @@
   }
   .btn-trade.enabled {
     background-color: var(--accent-blue); /* Fill in blue when eligible */
-    color: #fff;
+    color: #000;
     cursor: pointer;
   }
   /* Feedback text */
@@ -227,5 +227,5 @@
   }
   .btn-close-trade {
     background-color: #dc3545;
-    color: #fff;
+    color: #000;
   }

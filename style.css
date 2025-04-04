@@ -170,8 +170,8 @@
     border: 2px solid var(--accent-blue);
   }
   .btn-trade.disabled {
-    background-color: #000; /* White inside when ineligible */
-    color: var(--accent-blue);
+    background-color: #fff; /* White inside when ineligible */
+    color: #000;
     cursor: not-allowed;
   }
   .btn-trade.enabled {

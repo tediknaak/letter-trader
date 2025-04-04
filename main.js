@@ -149,22 +149,22 @@ function clearStagingWord() {
 /* --- SUBMIT WORD --- */
 function submitStagingWord() {
   if (!window.stagingWord) {
-    document.getElementById('word-feedback').innerText = 'No word to submit!';
+    document.getElementById('staging-feedback').innerText = 'No word to submit!';
     return;
   }
   const word = window.stagingWord.toUpperCase();
   clearStagingWord();
 
   if (!window.dictionary) {
-    document.getElementById('word-feedback').innerText = 'Dictionary not loaded yet.';
+    document.getElementById('staging-feedback').innerText = 'Dictionary not loaded yet.';
     return;
   }
   if (!window.dictionary.includes(word)) {
-    document.getElementById('word-feedback').innerText = `Word "${word}" not found in dictionary!`;
+    document.getElementById('staging-feedback').innerText = `"${word}" not found!`;
     return;
   }
   if (window.validWords.some(w => w.word === word)) {
-    document.getElementById('word-feedback').innerText = `Word "${word}" already submitted!`;
+    document.getElementById('staging-feedback').innerText = `"${word}" already submitted!`;
     return;
   }
 
@@ -202,7 +202,7 @@ function submitStagingWord() {
     }
   }
 
-  document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
+  //REMOVE VALID WORD FEEDBACK document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
   updateSubmittedWordsDisplay();
 
 
@@ -255,7 +255,7 @@ function enableTradeMode() {
 
   // The user will click a letter in the main set to choose letterToTrade
   // Then we’ll show available letters.
-  document.getElementById('word-feedback').innerText = 'Select a letter in your set to trade away.';
+  document.getElementById('trade-feedback').innerText = 'Select a letter in your set to trade away.';
 }
 
 function pickLetterToTrade(letter) {
@@ -264,7 +264,7 @@ function pickLetterToTrade(letter) {
 
   // Step 2: show trade options in the overlay
   showTradeOptions();
-  document.getElementById('word-feedback').innerText = `Now choose a new letter to replace "${letter}".`;
+  document.getElementById('trade-feedback').innerText = `Now choose a new letter to replace "${letter}".`;
 }
 
 /* Show letters A–Z except those in usedLetters. */
@@ -342,7 +342,7 @@ function confirmTrade() {
 
   // Update UI
   renderLetterButtons(window.allowedLetters);
-  document.getElementById('word-feedback').innerText = `Trade complete: ${from} → ${to}`;
+  document.getElementById('trade-feedback').innerText = `Trade complete: ${from} → ${to}`;
   closeTradeOverlay();
 }
 

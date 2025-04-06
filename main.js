@@ -135,6 +135,8 @@ function createLetterTile(letter, onClick) {
 function appendLetterToStaging(letter) {
   window.stagingWord = (window.stagingWord || '') + letter;
   updateStagingDisplay();
+  // Clear the feedback message when user starts building a new word
+  document.getElementById('staging-feedback').innerText = '';
 }
 
 function updateStagingDisplay() {

@@ -84,28 +84,52 @@ function renderLetterButtons(letterArray) {
     const container = document.getElementById('letters-container');
     container.innerHTML = '';
   
-    // Render each actual letter
     letterArray.forEach(letter => {
       const btn = createLetterTile(letter, () => {
         if (window.tradeMode) {
-          pickLetterToTrade(letter);
+          // When in trade mode, selecting a letter triggers trade selection
+          selectTradeLetter(letter);
         } else {
           appendLetterToStaging(letter);
         }
       });
+      // In trade mode, add green border; if this letter is the one selected, add extra styling.
+      if (window.tradeMode) {
+        btn.classList.add('trade-mode');
+        if (letter === window.letterToTrade) {
+          btn.classList.add('selected-for-trade');
+        }
+      }
       container.appendChild(btn);
     });
   
-    // Now add a backspace tile
-    const backspaceTile = document.createElement('button');
-    // Use both classes so it inherits .letter-button’s size/position, plus the .backspace-button overrides
-    backspaceTile.classList.add('letter-button', 'backspace-button');
+    // Only add backspace tile if not in trade mode
+    if (!window.tradeMode) {
+      const backspaceTile = document.createElement('button');
+      backspaceTile.classList.add('letter-button', 'backspace-button');
+      backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
+      backspaceTile.addEventListener('click', () => {
+        if (!window.tradeMode) {
+          handleBackspace();
+        }
+      });
+      container.appendChild(backspaceTile);
+    }
+  }
 
     function handleBackspace() {
         if (window.stagingWord.length > 0) {
           window.stagingWord = window.stagingWord.slice(0, -1);
           updateStagingDisplay();
         }
+      }
+    
+    function selectTradeLetter(letter) {
+        window.letterToTrade = letter;
+        // Re-render so that the selected letter gets the extra style
+        renderLetterButtons(window.allowedLetters);
+        // Now show the trade options popup
+        showTradeOptions();
       }
 
     backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
@@ -243,9 +267,13 @@ function updateSubmittedWordsDisplay() {
 
 /* --- TRADE FLOW --- */
 function enableTradeMode() {
-  window.tradeMode = true;
-  window.letterToTrade = null;
-  window.letterToTradeNew = null;
+    window.tradeMode = true;
+    window.letterToTrade = null; // clear any previous selection
+    // Update the staging feedback with instructions
+    document.getElementById('staging-feedback').innerText = "Select a letter to trade.";
+    // Re-render letter tiles so they show the green border (trade mode style)
+    renderLetterButtons(window.allowedLetters);
+  }
 
   // Show overlay
   document.getElementById('trade-overlay').classList.remove('hidden');
@@ -270,19 +298,22 @@ function pickLetterToTrade(letter) {
 }
 
 /* Show letters A–Z except those in usedLetters. */
-function showTradeOptions() {
-  const tradeOptionsEl = document.getElementById('trade-options');
-  tradeOptionsEl.innerHTML = '';
-
-  const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  const availableLetters = allLetters.filter(l => !window.usedLetters.includes(l));
-
-  availableLetters.forEach(l => {
-    const btn = createTradeOptionTile(l, () => {
-      pickNewLetterForTrade(l);
+function showTradeOptionsPopup() {
+    // Show the popup overlay
+    document.getElementById('trade-overlay').classList.remove('hidden');
+    // Clear previous options
+    const tradeOptionsEl = document.getElementById('trade-options');
+    tradeOptionsEl.innerHTML = '';
+  
+    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    // Filter out letters that have been used (or that are already in the current set)
+    const availableLetters = allLetters.filter(l => !window.usedLetters.includes(l));
+    availableLetters.forEach(l => {
+      const btn = createTradeOptionTile(l, () => {
+        pickNewLetterForTrade(l);
+      });
+      tradeOptionsEl.appendChild(btn);
     });
-    tradeOptionsEl.appendChild(btn);
-  });
 }
 
 /* Create a trade-option tile with letter & points */
@@ -340,7 +371,10 @@ function confirmTrade() {
   window.letterToTradeNew = null;
 
   // Hide trade button again
-  document.getElementById('trade-letter').style.display = 'none';
+  document.getElementById('trade-letter').addEventListener('click', () => {
+    // Enable trade mode without showing the popup immediately
+    enableTradeMode();
+  });
 
   // Update UI
   renderLetterButtons(window.allowedLetters);

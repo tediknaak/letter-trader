@@ -237,3 +237,13 @@
     background-color: #dc3545;
     color: #000;
   }
+  
+  /* When in trade mode, letter tiles get a green border */
+.trade-mode {
+  border-color: rgb(131, 208, 103) !important;
+}
+
+/* For the selected letter tile to trade, use a darker or highlighted green */
+.selected-for-trade {
+    background-color: rgb(131, 208, 103) !important;
+}

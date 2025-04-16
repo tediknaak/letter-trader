@@ -151,6 +151,12 @@
     background-color: #ccc;      /* Gray background */
     border-color: #ccc;          /* Darker gray border */
   }
+
+  .backspace-disabled {
+    background-color: #bababa;
+    border-color: #bababa;
+    cursor: not-allowed;
+    }
   
   /* Controls & Feedback */
   .controls {

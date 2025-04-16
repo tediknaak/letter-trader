@@ -103,18 +103,20 @@ function renderLetterButtons(letterArray) {
       container.appendChild(btn);
     });
   
-    // Only add backspace tile if not in trade mode
-    if (!window.tradeMode) {
-      const backspaceTile = document.createElement('button');
-      backspaceTile.classList.add('letter-button', 'backspace-button');
-      backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
+      // Always add backspace tile at the end
+    const backspaceTile = document.createElement('button');
+    backspaceTile.classList.add('letter-button', 'backspace-button');
+    backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
+    if (window.tradeMode) {
+      // In trade mode, disable backspace functionality and style it as disabled
+      backspaceTile.classList.add('backspace-disabled');
+      backspaceTile.disabled = true;
+    } else {
       backspaceTile.addEventListener('click', () => {
-        if (!window.tradeMode) {
           handleBackspace();
-        }
       });
-      container.appendChild(backspaceTile);
-    }
+     }
+     container.appendChild(backspaceTile);
   }
 
     function handleBackspace() {
@@ -129,7 +131,7 @@ function renderLetterButtons(letterArray) {
         // Re-render so that the selected letter gets the extra style
         renderLetterButtons(window.allowedLetters);
         // Now show the trade options popup
-        showTradeOptions();
+        showTradeOptionsPopoup();
       }
 
 

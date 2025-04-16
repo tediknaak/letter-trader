@@ -132,14 +132,6 @@ function renderLetterButtons(letterArray) {
         showTradeOptions();
       }
 
-    backspaceTile.innerHTML = `<span class="letter-main">&#9003;</span>`;
-    backspaceTile.addEventListener('click', () => {
-    if (!window.tradeMode) {
-        handleBackspace();
-    }
-    });
-    container.appendChild(backspaceTile);
-
 
 /* --- CREATE A LETTER TILE WITH POINTS --- */
 function createLetterTile(letter, onClick) {

@@ -139,8 +139,7 @@ function renderLetterButtons(letterArray) {
     }
     });
     container.appendChild(backspaceTile);
-  
-}
+    
 
 /* --- CREATE A LETTER TILE WITH POINTS --- */
 function createLetterTile(letter, onClick) {

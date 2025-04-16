@@ -139,7 +139,7 @@ function renderLetterButtons(letterArray) {
     }
     });
     container.appendChild(backspaceTile);
-    
+
 
 /* --- CREATE A LETTER TILE WITH POINTS --- */
 function createLetterTile(letter, onClick) {
@@ -285,7 +285,7 @@ function enableTradeMode() {
   // The user will click a letter in the main set to choose letterToTrade
   // Then we’ll show available letters.
   document.getElementById('trade-feedback').innerText = 'Select a letter in your set to trade away.';
-}
+
 
 function pickLetterToTrade(letter) {
   // Step 1: user picks which letter they want to remove

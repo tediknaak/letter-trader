@@ -29,6 +29,9 @@ const letterScores = {
 // Number of valid words required to unlock trading
 const WORDS_TO_TRADE = 2;
 
+// Number of trades allowed per game
+const TRADES_ALLOWED = 3;
+
 // Utility: compute word score
 function computeScore(word) {
   let sum = 0;
@@ -352,7 +355,7 @@ function confirmTrade() {
 
   // Update UI
   renderLetterButtons(window.allowedLetters);
-  document.getElementById('trade-feedback').innerText = `Trade complete: ${from} → ${to}`;
+  // document.getElementById('trade-feedback').innerText = `Trade complete: ${from} → ${to}`; -- flag to remove
   closeTradeOverlay();
 }
 
@@ -375,7 +378,10 @@ function updateTradeButtonProgress() {
   /* --- CHECK TRADE ELIGIBILITY --- */
   function checkTradeEligibility() {
     const tradeBtn = document.getElementById('trade-letter');
-    if (window.validWordsSinceTrade >= WORDS_TO_TRADE) {
+    if (
+        window.validWordsSinceTrade >= WORDS_TO_TRADE &&
+        window.tradeLog.length < TRADES_ALLOWED
+      ) {
       // Enable
       tradeBtn.classList.remove('disabled');
       tradeBtn.classList.add('enabled');

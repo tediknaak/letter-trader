@@ -99,7 +99,6 @@
   .submitted-words-container tr:not(:last-child) td {
     border-bottom: 1px solid #e3f2fd; /* subtle row separator if you like */
   }
-  .submitted-words-container th:nth-child(2),
   .submitted-words-container td:nth-child(2) {
     text-align: right; /* right-align points column */
   }
@@ -234,6 +233,7 @@
   .trade-confirmation {
     margin-bottom: 1rem;
   }
+
   .trade-instructions {
     margin-bottom: 1rem;
     font-size: 0.9rem;
@@ -256,6 +256,7 @@
 
 /* Highlight the trade rows with a light green background */
 .trade-row-cell {
-    background-color: rgb(131, 208, 103);  /* light green */
-    color: #256029;             /* dark green text */
+    background-color: rgb(174, 232, 153);  /* light green */
+    color: black;
+    text-align: center;
   }

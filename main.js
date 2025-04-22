@@ -192,43 +192,11 @@ function submitStagingWord() {
   window.totalScore += score;
   window.validWordsSinceTrade++;
 
-  //Update trade button progress color fill
-  function updateTradeButtonProgress() {
-    const tradeBtn = document.getElementById('trade-letter');
-    // Calculate progress as a percentage (max 100%)
-    const progress = Math.min(window.validWordsSinceTrade, 10) / 10 * 100;
-    
-    // Set the background as a left-to-right gradient:
-    // The left "progress" percentage is blue (using our accent blue), and the remainder is white.
-    tradeBtn.style.backgroundImage = `linear-gradient(to right, var(--accent-blue) 0%, var(--accent-blue) ${progress}%, #fff ${progress}%, #fff 100%)`;
-  }
-
   updateTradeButtonProgress();
-
-  // After each valid word submission
-    function checkTradeEligibility() {
-    const tradeBtn = document.getElementById('trade-letter');
-    if (window.validWordsSinceTrade >= 10) {
-      // Enable
-      tradeBtn.classList.remove('disabled');
-      tradeBtn.classList.add('enabled');
-      tradeBtn.disabled = false;
-    } else {
-      // Disable
-      tradeBtn.classList.remove('enabled');
-      tradeBtn.classList.add('disabled');
-      tradeBtn.disabled = true;
-    }
-  }
+  checkTradeEligibility();
 
   //REMOVE VALID WORD FEEDBACK document.getElementById('word-feedback').innerText = `Valid: ${word} (+${score})`;
   updateSubmittedWordsDisplay();
-
-
-  // Unlock trade if user hits 10 words since last trade
-  if (window.validWordsSinceTrade >= 10) {
-    document.getElementById('trade-letter').style.display = 'inline-block';
-  }
 }
 
 /* --- DISPLAY SUBMITTED WORDS & SCORE --- */
@@ -362,6 +330,33 @@ function closeTradeOverlay() {
   document.getElementById('trade-overlay').classList.add('hidden');
 }
 
+/* --- UPDATE TRADE BUTTON PROGRESS --- */
+function updateTradeButtonProgress() {
+    const tradeBtn = document.getElementById('trade-letter');
+    // Calculate progress as a percentage (max 100%)
+    const progress = Math.min(window.validWordsSinceTrade, 10) / 10 * 100;
+    
+    // Set the background as a left-to-right gradient:
+    // The left "progress" percentage is blue (using our accent blue), and the remainder is white.
+    tradeBtn.style.backgroundImage = `linear-gradient(to right, var(--accent-blue) 0%, var(--accent-blue) ${progress}%, #fff ${progress}%, #fff 100%)`;
+  }
+  
+  /* --- CHECK TRADE ELIGIBILITY --- */
+  function checkTradeEligibility() {
+    const tradeBtn = document.getElementById('trade-letter');
+    if (window.validWordsSinceTrade >= 10) {
+      // Enable
+      tradeBtn.classList.remove('disabled');
+      tradeBtn.classList.add('enabled');
+      tradeBtn.disabled = false;
+    } else {
+      // Disable
+      tradeBtn.classList.remove('enabled');
+      tradeBtn.classList.add('disabled');
+      tradeBtn.disabled = true;
+    }
+  }
+  
 /* --- EVENT LISTENERS --- */
 document.getElementById('submit-word').addEventListener('click', submitStagingWord);
 document.getElementById('trade-letter').addEventListener('click', enableTradeMode);
@@ -379,16 +374,4 @@ fetchDailyLetters();
 loadDictionary();
 
 // Ensure trade button is correctly enabled/disabled at page load
-function checkTradeEligibility() {
-    const tradeBtn = document.getElementById('trade-letter');
-    if (window.validWordsSinceTrade >= 10) {
-      tradeBtn.classList.remove('disabled');
-      tradeBtn.classList.add('enabled');
-      tradeBtn.disabled = false;
-    } else {
-      tradeBtn.classList.remove('enabled');
-      tradeBtn.classList.add('disabled');
-      tradeBtn.disabled = true;
-    }
-  }
   checkTradeEligibility();

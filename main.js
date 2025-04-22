@@ -26,6 +26,9 @@ const letterScores = {
   U: 1, V: 4, W: 4, X: 10, Y: 4, Z: 10
 };
 
+// Number of valid words required to unlock trading
+const WORDS_TO_TRADE = 2;
+
 // Utility: compute word score
 function computeScore(word) {
   let sum = 0;
@@ -335,7 +338,7 @@ function closeTradeOverlay() {
 function updateTradeButtonProgress() {
     const tradeBtn = document.getElementById('trade-letter');
     // Calculate progress as a percentage (max 100%)
-    const progress = Math.min(window.validWordsSinceTrade, 10) / 10 * 100;
+    const progress = Math.min(window.validWordsSinceTrade, WORDS_TO_TRADE) / WORDS_TO_TRADE * 100;
     
     // Set the background as a left-to-right gradient:
     // The left "progress" percentage is blue (using our accent blue), and the remainder is white.
@@ -345,7 +348,7 @@ function updateTradeButtonProgress() {
   /* --- CHECK TRADE ELIGIBILITY --- */
   function checkTradeEligibility() {
     const tradeBtn = document.getElementById('trade-letter');
-    if (window.validWordsSinceTrade >= 2) {
+    if (window.validWordsSinceTrade >= WORDS_TO_TRADE) {
       // Enable
       tradeBtn.classList.remove('disabled');
       tradeBtn.classList.add('enabled');

@@ -131,7 +131,7 @@ function renderLetterButtons(letterArray) {
         // Re-render so that the selected letter gets the extra style
         renderLetterButtons(window.allowedLetters);
         // Now show the trade options popup
-        showTradeOptionsPopoup();
+        showTradeOptionsPopup();
       }
 
 
@@ -268,18 +268,6 @@ function enableTradeMode() {
     renderLetterButtons(window.allowedLetters);
   }
 
-  // Show overlay
-  document.getElementById('trade-overlay').classList.remove('hidden');
-
-  // Clear any old content
-  document.getElementById('trade-confirmation').classList.add('hidden');
-  document.getElementById('trade-summary').textContent = '';
-  document.getElementById('trade-options').innerHTML = '';
-
-  // The user will click a letter in the main set to choose letterToTrade
-  // Then we’ll show available letters.
-  document.getElementById('trade-feedback').innerText = 'Select a letter in your set to trade away.';
-
 
 function pickLetterToTrade(letter) {
   // Step 1: user picks which letter they want to remove
@@ -363,12 +351,6 @@ function confirmTrade() {
   window.letterToTrade = null;
   window.letterToTradeNew = null;
 
-  // Hide trade button again
-  document.getElementById('trade-letter').addEventListener('click', () => {
-    // Enable trade mode without showing the popup immediately
-    enableTradeMode();
-  });
-
   // Update UI
   renderLetterButtons(window.allowedLetters);
   document.getElementById('trade-feedback').innerText = `Trade complete: ${from} → ${to}`;
@@ -395,3 +377,18 @@ document.getElementById('close-trade-overlay').addEventListener('click', () => {
 // Init
 fetchDailyLetters();
 loadDictionary();
+
+// Ensure trade button is correctly enabled/disabled at page load
+function checkTradeEligibility() {
+    const tradeBtn = document.getElementById('trade-letter');
+    if (window.validWordsSinceTrade >= 10) {
+      tradeBtn.classList.remove('disabled');
+      tradeBtn.classList.add('enabled');
+      tradeBtn.disabled = false;
+    } else {
+      tradeBtn.classList.remove('enabled');
+      tradeBtn.classList.add('disabled');
+      tradeBtn.disabled = true;
+    }
+  }
+  checkTradeEligibility();

@@ -204,30 +204,52 @@ function submitStagingWord() {
 
 /* --- DISPLAY SUBMITTED WORDS & SCORE --- */
 function updateSubmittedWordsDisplay() {
-    const tbody = document.getElementById('submitted-words-tbody');
-    tbody.innerHTML = '';
-  
-    window.validWords.forEach(item => {
-      const tr = document.createElement('tr');
-      const tdWord = document.createElement('td');
-      tdWord.textContent = item.word;
-      const tdPoints = document.createElement('td');
-      tdPoints.textContent = item.score;
-      tr.appendChild(tdWord);
-      tr.appendChild(tdPoints);
-      tbody.appendChild(tr);
-    });
-  
-    // Auto-scroll
-    const container = document.getElementById('submitted-words-container');
-    container.scrollTop = container.scrollHeight;
-  
-    // Update the total score display
-    document.getElementById('total-score').textContent = window.totalScore;
-  
-    // Update words-submitted count
-    document.getElementById('words-submitted-count').textContent = window.validWords.length;
+  const tbody = document.getElementById('submitted-words-tbody');
+  tbody.innerHTML = '';
+
+  const trades = window.tradeLog;
+  const words = window.validWords;
+
+  // Helper to append a trade row
+  function appendTradeRow(t) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.setAttribute('colspan', '2');
+    td.textContent = `TRADE: ${t.from} → ${t.to}`;
+    td.classList.add('trade-row-cell');
+    tr.appendChild(td);
+    tbody.appendChild(tr);
   }
+
+  // Iterate through word indices, interleaving trades
+  words.forEach((item, i) => {
+    // Insert any trades that occurred at this position
+    trades.filter(t => t.position === i).forEach(appendTradeRow);
+
+    // Insert the word row
+    const tr = document.createElement('tr');
+    const tdWord = document.createElement('td');
+    tdWord.textContent = item.word;
+    const tdPoints = document.createElement('td');
+    tdPoints.textContent = item.score;
+    tr.appendChild(tdWord);
+    tr.appendChild(tdPoints);
+    tbody.appendChild(tr);
+  });
+
+  // Handle trades that occur after the last word
+  trades.filter(t => t.position === words.length).forEach(appendTradeRow);
+
+  // Auto-scroll the table container
+  const container = document.getElementById('submitted-words-container');
+  container.scrollTop = container.scrollHeight;
+
+  // Update the total score display
+  document.getElementById('total-score').textContent = window.totalScore;
+
+  // Update words-submitted count
+  document.getElementById('words-submitted-count').textContent = window.validWords.length;
+}
 
 /* --- TRADE FLOW --- */
 function enableTradeMode() {
@@ -312,7 +334,8 @@ function confirmTrade() {
   window.tradeLog.push({
     from,
     to,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    position: window.validWords.length
   });
 
   // Reset counters & close trade mode

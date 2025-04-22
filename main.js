@@ -315,6 +315,7 @@ function confirmTrade() {
   // Reset counters & close trade mode
   window.validWordsSinceTrade = 0;
   updateTradeButtonProgress();
+  checkTradeEligibility();
   window.tradeMode = false;
   window.letterToTrade = null;
   window.letterToTradeNew = null;
@@ -344,7 +345,7 @@ function updateTradeButtonProgress() {
   /* --- CHECK TRADE ELIGIBILITY --- */
   function checkTradeEligibility() {
     const tradeBtn = document.getElementById('trade-letter');
-    if (window.validWordsSinceTrade >= 10) {
+    if (window.validWordsSinceTrade >= 2) {
       // Enable
       tradeBtn.classList.remove('disabled');
       tradeBtn.classList.add('enabled');
@@ -374,4 +375,4 @@ fetchDailyLetters();
 loadDictionary();
 
 // Ensure trade button is correctly enabled/disabled at page load
-  checkTradeEligibility();
+checkTradeEligibility();

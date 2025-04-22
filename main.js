@@ -213,6 +213,7 @@ function updateSubmittedWordsDisplay() {
   // Helper to append a trade row
   function appendTradeRow(t) {
     const tr = document.createElement('tr');
+    tr.classList.add('trade-row-cell');
     const td = document.createElement('td');
     td.setAttribute('colspan', '2');
     td.textContent = `TRADE: ${t.from} → ${t.to}`;
@@ -337,6 +338,9 @@ function confirmTrade() {
     timestamp: new Date().toISOString(),
     position: window.validWords.length
   });
+
+  //Update table with trade row
+  updateSubmittedWordsDisplay();
 
   // Reset counters & close trade mode
   window.validWordsSinceTrade = 0;

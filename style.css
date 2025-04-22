@@ -253,3 +253,9 @@
 .selected-for-trade {
     background-color: rgb(131, 208, 103) !important;
 }
+
+/* Highlight the trade rows with a light green background */
+.trade-row-cell {
+    background-color: rgb(131, 208, 103);  /* light green */
+    color: #256029;             /* dark green text */
+  }
